@@ -29,49 +29,52 @@ import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
 
 class InnerEvent {
 
-    public static InnerEvent create(LogRecord lRecord) {
-      if (lRecord instanceof LogUtils.TraceEventLogRecord) {
-        TraceEventLogRecord rec = (TraceEventLogRecord) lRecord;
-        double ts = (double) rec.getParameters()[0];
-        String phase = (String) rec.getParameters()[1];
-        String pid = (String) rec.getParameters()[2];
-        String tid = (String) rec.getParameters()[2];
-        return new InnerEvent(rec, ts, phase, pid, tid);
-      }
-      return null;
-    }
+	public static InnerEvent create(LogRecord lRecord) {
+		if (lRecord instanceof LogUtils.TraceEventLogRecord) {
+			TraceEventLogRecord rec = (TraceEventLogRecord) lRecord;
+			Object[] parameters = rec.getParameters();
+			if (parameters != null && parameters.length >= 3) {
+				double ts = ((Long) parameters[0]).longValue()*0.001;
+				String phase = String.valueOf(parameters[1]);
+				String pid = String.valueOf(parameters[2]);
+				String tid = String.valueOf(parameters[2]);
+				return new InnerEvent(rec, ts, phase, pid, tid);
+			}
+		}
+		return null;
+	}
 
-  private final LogRecord message;
-  private final double ts;
-  private final String tid;
-  private final String pid;
-  private final String phase;
+	private final LogRecord message;
+	private final double ts;
+	private final String tid;
+	private final String pid;
+	private final String phase;
 
-  public InnerEvent(LogRecord message, double ts, String phase, String pid, String tid) {
-    this.message = message;
-    this.ts = ts;
-    this.phase = phase;
-    this.tid = tid;
-    this.pid = pid;
-  }
+	public InnerEvent(LogRecord message, double ts, String phase, String pid, String tid) {
+		this.message = message;
+		this.ts = ts;
+		this.phase = phase;
+		this.tid = tid;
+		this.pid = pid;
+	}
 
-  public String getMessage() {
-    return message.getMessage();
-  }
+	public String getMessage() {
+		return message.getMessage();
+	}
 
-  public double getTs() {
-    return ts;
-  }
+	public double getTs() {
+		return ts;
+	}
 
-  public String getTid() {
-    return tid;
-  }
+	public String getTid() {
+		return tid;
+	}
 
-  public String getPid() {
-    return pid;
-  }
+	public String getPid() {
+		return pid;
+	}
 
-  public String getPhase() {
-    return phase;
-  }
+	public String getPhase() {
+		return phase;
+	}
 }
