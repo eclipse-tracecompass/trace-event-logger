@@ -32,8 +32,8 @@ public class TestLoggerBenchmark {
 		long warmUp = 2000;
 		long maxRuns = warmUp * 10;
 		fLogger = Logger.getAnonymousLogger();
-		files[0] = new File("/tmp/trace-old.json");
-		files[1] = new File("/tmp/trace-new.json");
+		files[0] = File.createTempFile("trace-old" ,".json");
+		files[1] = File.createTempFile("trace-new" ,".json");
 		oldFileHandler = new FileHandler(files[0].getAbsolutePath());
 		oldFileHandler.setFormatter(new Formatter() {
 			@Override
@@ -211,8 +211,8 @@ public class TestLoggerBenchmark {
 		long warmUp = 2000;
 		long maxRuns = warmUp * 10;
 		fLogger = Logger.getAnonymousLogger();
-		files[0] = new File("/tmp/trace-lean-old.json");
-		files[1] = new File("/tmp/trace-lean-new.json");
+		files[0] = File.createTempFile("trace-lean-old" ,".json");
+		files[1] = File.createTempFile("trace-lean-new" ,".json");
 		oldFileHandler = new FileHandler(files[0].getAbsolutePath());
 		oldFileHandler.setFormatter(new Formatter() {
 			@Override
