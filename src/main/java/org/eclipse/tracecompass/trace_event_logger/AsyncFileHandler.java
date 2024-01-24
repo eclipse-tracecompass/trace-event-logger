@@ -150,13 +150,23 @@ public class AsyncFileHandler extends StreamHandler {
 		this(""); // let's hope it's configured in logging properties.
 	}
 
+	/**
+	 * Asynchronous file handler, wraps a {@link FileHandler} behind a thread
+	 * @param pattern the file pattern
+	 * @throws SecurityException 
+	 * @throws IOException
+	 */
 	public AsyncFileHandler(String pattern) throws SecurityException, IOException {
 		configure();
 		fileHandler = new FileHandler(pattern);
-		fileHandler.setEncoding(encoding);
-		fileHandler.setErrorManager(errorManager);
-		fileHandler.setFilter(filter);
-		fileHandler.setLevel(level);
+		if (encoding != null)
+			fileHandler.setEncoding(encoding);
+		if (errorManager != null)
+			fileHandler.setErrorManager(errorManager);
+		if (filter != null)
+			fileHandler.setFilter(filter);
+		if (level != null)
+			fileHandler.setLevel(level);
 
 		queue = new ArrayBlockingQueue<>(queueDepth);
 		timer.scheduleAtFixedRate(task, flushRate, flushRate);
@@ -277,7 +287,7 @@ public class AsyncFileHandler extends StreamHandler {
 	public synchronized void publish(LogRecord record) {
 		try {
 			recordBuffer.add(record);
-			if (recordBuffer.size() >= maxSize) {
+			if (recordBuffer.size() >= maxSize && isLoggable(record)) {
 				queue.put(recordBuffer);
 				recordBuffer = new ArrayList<>(maxSize);
 			}
