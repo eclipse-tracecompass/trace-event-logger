@@ -23,25 +23,26 @@ import org.junit.Test;
 public class TestLoggerBenchmark {
 
 	private Logger fLogger;
-	private Handler fileHandler;
+	private Handler oldFileHandler;
+	private Handler newFileHandler;
 	private File[] files = new File[2];
 
 	@Test
 	public void testBench() throws SecurityException, IOException {
-		long warmUp = 10000;
-		long maxRuns = 100000;
+		long warmUp = 2000;
+		long maxRuns = warmUp * 10;
 		fLogger = Logger.getAnonymousLogger();
 		files[0] = new File("/tmp/trace-old.json");
 		files[1] = new File("/tmp/trace-new.json");
-		fileHandler = new FileHandler(files[0].getAbsolutePath());
-		fileHandler.setFormatter(new Formatter() {
+		oldFileHandler = new FileHandler(files[0].getAbsolutePath());
+		oldFileHandler.setFormatter(new Formatter() {
 			@Override
 			public String format(LogRecord record) {
 				return record.getMessage() + ",\n";
 			}
 		});
-		fileHandler.setLevel(Level.ALL);
-		fLogger.addHandler(fileHandler);
+		oldFileHandler.setLevel(Level.ALL);
+		fLogger.addHandler(oldFileHandler);
 		fLogger.setLevel(Level.ALL);
 		Logger logger = fLogger;
 		List<Long> asyncNew = new ArrayList<>();
@@ -49,7 +50,7 @@ public class TestLoggerBenchmark {
 		List<Long> syncNew = new ArrayList<>();
 		List<Long> syncOld = new ArrayList<>();
 		List<Long> run = new ArrayList<>();
-		for (long runs = 2000; runs < maxRuns; runs *= 1.2) {
+		for (long runs = 2000; runs < maxRuns; runs *= 1.4) {
 			for (long i = 0; i < warmUp; i++) {
 				try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) {
 					try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) {
@@ -77,12 +78,12 @@ public class TestLoggerBenchmark {
 			long end = System.nanoTime();
 			syncNew.add(end - start);
 			for (long i = 0; i < warmUp; i++) {
-				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo",
-						"run", runs, "test", i)) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar", "run", runs, "test", i)) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz", "run", runs, "test", i)) {
+				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo", "run", runs, "test",
+						i)) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar", "run", runs,
+							"test", i)) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz", "run",
+								runs, "test", i)) {
 							// do something
 							new Object();
 						}
@@ -92,12 +93,12 @@ public class TestLoggerBenchmark {
 
 			long start2 = System.nanoTime();
 			for (long i = 0; i < runs; i++) {
-				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo",
-						"run", runs, "test", i)) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar", "run", runs, "test", i)) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz", "run", runs, "test", i)) {
+				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo", "run", runs, "test",
+						i)) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar", "run", runs,
+							"test", i)) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz", "run",
+								runs, "test", i)) {
 							// do something
 							new Object();
 						}
@@ -108,17 +109,17 @@ public class TestLoggerBenchmark {
 			syncOld.add(end2 - start2);
 			run.add(runs);
 		}
-		fLogger.removeHandler(fileHandler);
-		fileHandler = new AsyncFileHandler(files[1].getAbsolutePath());
-		fileHandler.setFormatter(new Formatter() {
+		fLogger.removeHandler(oldFileHandler);
+		newFileHandler = new AsyncFileHandler(files[1].getAbsolutePath());
+		newFileHandler.setFormatter(new Formatter() {
 			@Override
 			public String format(LogRecord record) {
 				return record.getMessage() + ",\n";
 			}
 		});
-		fileHandler.setLevel(Level.ALL);
-		fLogger.addHandler(fileHandler);
-		for (long runs = 2000; runs < maxRuns; runs *= 1.2) {
+		newFileHandler.setLevel(Level.ALL);
+		fLogger.addHandler(newFileHandler);
+		for (long runs = 2000; runs < maxRuns; runs *= 1.4) {
 			for (long i = 0; i < warmUp; i++) {
 				try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) {
 					try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) {
@@ -147,10 +148,8 @@ public class TestLoggerBenchmark {
 			asyncNew.add(end - start);
 			for (long i = 0; i < warmUp; i++) {
 				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo")) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar")) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz")) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
 							// do something
 							new Object();
 						}
@@ -160,12 +159,12 @@ public class TestLoggerBenchmark {
 
 			long start2 = System.nanoTime();
 			for (long i = 0; i < runs; i++) {
-				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo",
-						"run", runs, "test", i)) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar", "run", runs, "test", i)) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz", "run", runs, "test", i)) {
+				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo", "run", runs, "test",
+						i)) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar", "run", runs,
+							"test", i)) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz", "run",
+								runs, "test", i)) {
 							// do something
 							new Object();
 						}
@@ -194,6 +193,12 @@ public class TestLoggerBenchmark {
 	public void waiting() {
 		try {
 			while (linecount(files[0].toPath()) != linecount(files[1].toPath())) {
+				if(oldFileHandler != null) {
+					oldFileHandler.close();
+				}
+				if(newFileHandler != null) {
+					newFileHandler.close();
+				}
 				Thread.currentThread().sleep(100);
 			}
 		} catch (IOException | InterruptedException e) {
@@ -203,20 +208,20 @@ public class TestLoggerBenchmark {
 
 	@Test
 	public void testLeanBench() throws SecurityException, IOException {
-		long warmUp = 10000;
-		long maxRuns = 100000;
+		long warmUp = 2000;
+		long maxRuns = warmUp * 10;
 		fLogger = Logger.getAnonymousLogger();
 		files[0] = new File("/tmp/trace-lean-old.json");
 		files[1] = new File("/tmp/trace-lean-new.json");
-		fileHandler = new FileHandler(files[0].getAbsolutePath());
-		fileHandler.setFormatter(new Formatter() {
+		oldFileHandler = new FileHandler(files[0].getAbsolutePath());
+		oldFileHandler.setFormatter(new Formatter() {
 			@Override
 			public String format(LogRecord record) {
 				return record.getMessage() + ",\n";
 			}
 		});
-		fileHandler.setLevel(Level.ALL);
-		fLogger.addHandler(fileHandler);
+		oldFileHandler.setLevel(Level.ALL);
+		fLogger.addHandler(oldFileHandler);
 		fLogger.setLevel(Level.ALL);
 		Logger logger = fLogger;
 		List<Long> asyncNew = new ArrayList<>();
@@ -224,7 +229,7 @@ public class TestLoggerBenchmark {
 		List<Long> syncNew = new ArrayList<>();
 		List<Long> syncOld = new ArrayList<>();
 		List<Long> run = new ArrayList<>();
-		for (long runs = 2000; runs < maxRuns; runs *= 1.2) {
+		for (long runs = 2000; runs < maxRuns; runs *= 1.4) {
 			for (long i = 0; i < warmUp; i++) {
 				try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) {
 					try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) {
@@ -251,10 +256,8 @@ public class TestLoggerBenchmark {
 			syncNew.add(end - start);
 			for (long i = 0; i < warmUp; i++) {
 				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo")) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar")) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz")) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
 							// do something
 							new Object();
 						}
@@ -265,10 +268,8 @@ public class TestLoggerBenchmark {
 			long start2 = System.nanoTime();
 			for (long i = 0; i < runs; i++) {
 				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo")) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar")) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz")) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
 							// do something
 							new Object();
 						}
@@ -279,17 +280,17 @@ public class TestLoggerBenchmark {
 			syncOld.add(end2 - start2);
 			run.add(runs);
 		}
-		fLogger.removeHandler(fileHandler);
-		fileHandler = new AsyncFileHandler(files[1].getAbsolutePath());
-		fileHandler.setFormatter(new Formatter() {
+		fLogger.removeHandler(oldFileHandler);
+		newFileHandler = new AsyncFileHandler(files[1].getAbsolutePath());
+		newFileHandler.setFormatter(new Formatter() {
 			@Override
 			public String format(LogRecord record) {
 				return record.getMessage() + ",\n";
 			}
 		});
-		fileHandler.setLevel(Level.ALL);
-		fLogger.addHandler(fileHandler);
-		for (long runs = 2000; runs < maxRuns; runs *= 1.2) {
+		newFileHandler.setLevel(Level.ALL);
+		fLogger.addHandler(newFileHandler);
+		for (long runs = 2000; runs < maxRuns; runs *= 1.4) {
 			for (long i = 0; i < warmUp; i++) {
 				try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) {
 					try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) {
@@ -317,10 +318,8 @@ public class TestLoggerBenchmark {
 			asyncNew.add(end - start);
 			for (long i = 0; i < warmUp; i++) {
 				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo")) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar")) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz")) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
 							// do something
 							new Object();
 						}
@@ -330,12 +329,10 @@ public class TestLoggerBenchmark {
 
 			long start2 = System.nanoTime();
 			for (long i = 0; i < runs; i++) {
-				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo",
-						"run", runs, "test", i)) {
-					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER,
-							"bar")) {
-						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger,
-								Level.FINEST, "baz")) {
+				try (OldLogUtils.ScopeLog log = new OldLogUtils.ScopeLog(logger, Level.FINE, "foo", "run", runs, "test",
+						i)) {
+					try (OldLogUtils.ScopeLog log1 = new OldLogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+						try (OldLogUtils.ScopeLog log2 = new OldLogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
 							// do something
 							new Object();
 						}
