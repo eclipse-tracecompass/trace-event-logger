@@ -378,7 +378,43 @@ public class LoggerTest {
             }
         }
     }
+    
 
+    /**
+     * Test the flow scope builder calling
+     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setCategory(String)}.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testFlowBuilderParentThenCatId() {
+        Logger logger = fLogger;
+        assertNotNull(logger);
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).setCategoryAndId("myspider",1).build()) {
+                // do something
+                new Object();
+            }
+        }
+    }
+
+    /**
+     * Test the flow scope builder calling
+     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setCategory(String)}.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testFlowBuilderCatIdThenParent() {
+        Logger logger = fLogger;
+        assertNotNull(logger);
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategoryAndId("myspider",1).setParentScope(log).build()) {
+                // do something
+                new Object();
+            }
+        }
+    }
+
+    
     /**
      * Test nesting with different arguments
      */

@@ -73,6 +73,17 @@ public class SnapshotTest {
 		logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "", 0L, 'E', "Bla"));
 		streamHandler.flush();
 	}
+	
+
+	@Test
+	public void badTest() {
+		Logger logger = this.logger;
+		assertNotNull(logger);
+		logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "", 0L, 'a'));
+		logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "", 0L, 'B'));
+		logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "", 0L, 'E'));
+		streamHandler.flush();
+	}
 
 	@Test
 	public void slowTest() throws InterruptedException, IOException {
