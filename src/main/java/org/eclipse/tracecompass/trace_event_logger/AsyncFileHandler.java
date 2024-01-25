@@ -152,8 +152,9 @@ public class AsyncFileHandler extends StreamHandler {
 
 	/**
 	 * Asynchronous file handler, wraps a {@link FileHandler} behind a thread
+	 * 
 	 * @param pattern the file pattern
-	 * @throws SecurityException 
+	 * @throws SecurityException
 	 * @throws IOException
 	 */
 	public AsyncFileHandler(String pattern) throws SecurityException, IOException {
