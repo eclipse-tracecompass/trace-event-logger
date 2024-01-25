@@ -42,8 +42,6 @@ To use **Asynchronous Nested Messages**, check [traceAsyncStart](#) and [traceAs
 
 To use **Object Tracking**, see [traceObjectCreation](#) and [traceObjectDestruction](#).
 
-## Performance
-
 On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, performance passes from 45 us/event to 1.1 us/event. There is also a cache effect that one could take advantage of, where if the data is not saturating the IO, speed is even higher.
 
 ## Design Philosophy
@@ -51,4 +49,3 @@ On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, performance passes from
 The design philosophy of this class is heavily inspired by the trace event format of Google. The full specification is available [here](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#).
 
 The main goals of this logger helper are clarity of output and simplicity for the developer. While performance is a nice-to-have, it is not the main concern of this helper. A minor performance impact compared to simply logging the events is to be expected.
-
