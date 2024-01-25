@@ -6,7 +6,7 @@
 
   <groupId>org.eclipse.tracecompass</groupId>
   <artifactId>trace-event-logger</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
 
   <name>trace-event-logger</name>
   <!-- the project's website -->
