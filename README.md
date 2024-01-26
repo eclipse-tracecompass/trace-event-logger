@@ -98,7 +98,9 @@ See more examples in javadoc.
 
 ## Viewing results
 
-While one could open the traces in their favorite text editor, results are better with a GUI. One could open the resulting json files in either `chrome://tracing` or (Eclipse Trace Compass)[www.eclipse.dev/tracecompass]. If the trace is malformed due to a handler not being configured properly, the program `jsonify.py` supplied in the root of the project can help restore it.
+While one could open the traces in their favorite text editor, results are better with a GUI. One could open the resulting json files in either `chrome://tracing` or (Eclipse Trace Compass)[www.eclipse.dev/tracecompass]. You will need to install trace event support by clicking on the tools->add ons menu in trace compass to load the JSON files. If the trace is malformed due to a handler not being configured properly, the program `jsonify.py` supplied in the root of the project can help restore it. 
+
+(video tutorial)[https://www.youtube.com/watch?v=YCdzmcpOrK4]
 
 ## Performance
 
