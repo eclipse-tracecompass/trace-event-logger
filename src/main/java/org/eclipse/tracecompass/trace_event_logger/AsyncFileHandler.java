@@ -26,6 +26,7 @@ package org.eclipse.tracecompass.trace_event_logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -138,10 +139,25 @@ public class AsyncFileHandler extends StreamHandler {
 		flushRate = 1000;
 		prop = manager.getProperty(cname + ".formatter");
 		try {
-			formatter = (Formatter) ClassLoader.getSystemClassLoader().loadClass(prop).newInstance();
+			formatter = (Formatter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			// we tried!
 		}
+		prop = manager.getProperty(cname + ".filter");
+		try {
+			filter = (Filter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
+		} catch (Exception e) {
+			// we tried!
+		}
+		
+		prop = manager.getProperty(cname + ".encoding");
+		try {
+			setEncoding(prop);
+		} catch (Exception e) {
+			// we tried!
+		}
+		
+		
 		prop = manager.getProperty(cname + ".flushRate");
 		try {
 			flushRate = Integer.parseInt(prop.trim());
