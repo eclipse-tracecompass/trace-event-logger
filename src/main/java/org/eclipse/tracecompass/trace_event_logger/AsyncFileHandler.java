@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
+import java.util.logging.XMLFormatter;
 
 import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
 
@@ -135,6 +136,12 @@ public class AsyncFileHandler extends StreamHandler {
 			queueDepth = 10000;
 		}
 		flushRate = 1000;
+		prop = manager.getProperty(cname + ".formatter");
+		try {
+			formatter = (Formatter) ClassLoader.getSystemClassLoader().loadClass(prop).newInstance();
+		} catch (Exception e) {
+			// we tried!
+		}
 		prop = manager.getProperty(cname + ".flushRate");
 		try {
 			flushRate = Integer.parseInt(prop.trim());
@@ -168,6 +175,8 @@ public class AsyncFileHandler extends StreamHandler {
 			fileHandler.setFilter(filter);
 		if (level != null)
 			fileHandler.setLevel(level);
+		if (formatter != null)
+			fileHandler.setFormatter(formatter);
 
 		queue = new ArrayBlockingQueue<>(queueDepth);
 		timer.scheduleAtFixedRate(task, flushRate, flushRate);
@@ -218,7 +227,7 @@ public class AsyncFileHandler extends StreamHandler {
 	public synchronized void setFormatter(Formatter newFormatter) throws SecurityException {
 		if (fileHandler != null)
 			fileHandler.setFormatter(newFormatter);
-		this.formatter = formatter;
+		this.formatter = newFormatter;
 	}
 
 	@Override
