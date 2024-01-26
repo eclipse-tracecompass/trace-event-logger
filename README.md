@@ -36,11 +36,63 @@ This is a logger helper designed to facilitate entry-exit analysis. The events g
 
 ## Usage
 
-To use **durations** and/or **flows**, refer to [ScopeLog](#) and [FlowScopeLog](#). Durations are typically used to instrument simple methods, while flows are preferred when there are links to be made with other threads.
+To use **durations** and/or **flows**, refer to ScopeLog and FlowScopeLog. Durations are typically used to instrument simple methods, while flows are preferred when there are links to be made with other threads.
 
-To use **Asynchronous Nested Messages**, check [traceAsyncStart](#) and [traceAsyncEnd](#).
+To use **Asynchronous Nested Messages**, check traceAsyncStart and traceAsyncEnd].
 
-To use **Object Tracking**, see [traceObjectCreation](#) and [traceObjectDestruction](#).
+To use **Object Tracking**, see traceObjectCreation and traceObjectDestruction.
+
+### Examples
+
+
+To instrument
+
+	public class SlappyWag {
+		public static void main(String[] args) {
+			System.out.println("The program will write hello 10x between two scope logs\n");
+			try (FileWriter fw = new FileWriter("test.txt")) {
+				for (int i = 0; i < 10; i++) {
+					fw.write("Hello world "+ i);
+				}
+			}
+		}
+	}
+
+one needs to add to the try-with-resources block a scopewriter
+
+	public class SlappyWag {
+		
+		Logger logger = Logger.getAnonymousLogger();
+		
+		public static void main(String[] args) {
+			System.out.println("The program will write hello 10x between two scope logs\n");
+			try (LogUtils.ScopeLog sl = new LogUtils.ScopeLog(logger, Level.FINE, "writing to file"); FileWriter fw = new FileWriter("test.txt")) {
+				for (int i = 0; i < 10; i++) {
+					fw.write("Hello world "+ i);
+				}
+			}
+		}
+	}
+
+Will generate the following trace
+
+    {"ts":0,"ph":"B","tid":1,"name":"writing to file"}
+    {"ts":100000,"ph":"E","tid":1}
+
+
+example 2:
+
+	try (ScopeLog linksLogger = new ScopeLog(LOGGER, Level.CONFIG, "Perform Query")) { //$NON-NLS-1$
+      ss.updateAllReferences();
+      dataStore.addAll(ss.query(ts, trace));
+	}
+
+will generate the following trace
+	
+    {"ts":12345,"ph":"B","tid":1,"name":"Perform Query"}
+    {"ts":"12366,"ph":"E","tid":1}
+
+See more examples in javadoc.
 
 On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, performance passes from 45 us/event to 1.1 us/event. There is also a cache effect that one could take advantage of, where if the data is not saturating the IO, speed is even higher.
 
