@@ -42,6 +42,8 @@ To use **Asynchronous Nested Messages**, check traceAsyncStart and traceAsyncEnd
 
 To use **Object Tracking**, see traceObjectCreation and traceObjectDestruction.
 
+To use free form tracing, check traceInstant.
+
 ### Examples
 
 
@@ -93,6 +95,12 @@ will generate the following trace
     {"ts":"12366,"ph":"E","tid":1}
 
 See more examples in javadoc.
+
+## Viewing results
+
+While one could open the traces in their favorite text editor, results are better with a GUI. One could open the resulting json files in either `chrome://tracing` or (Eclipse Trace Compass)[www.eclipse.dev/tracecompass]. If the trace is malformed due to a handler not being configured properly, the program `jsonify.py` supplied in the root of the project can help restore it.
+
+## Performance
 
 On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, performance passes from 45 us/event to 1.1 us/event. There is also a cache effect that one could take advantage of, where if the data is not saturating the IO, speed is even higher.
 
