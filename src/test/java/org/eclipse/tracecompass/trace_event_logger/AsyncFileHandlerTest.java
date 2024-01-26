@@ -71,6 +71,25 @@ public class AsyncFileHandlerTest {
 			fail(e.getMessage());
 		}
 	}
+	
+	/**
+	 * Test with good configuration
+	 */
+	@Test
+	public void testGoodConfigure() {
+		Logger logger = this.logger;
+		try (InputStream fis = new FileInputStream(
+				new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/goodlogging.properties"))) {
+			LogManager manager = LogManager.getLogManager();
+			manager.readConfiguration(fis);
+			Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath());
+			first.close();
+		} catch (FileNotFoundException e) {
+			fail(e.getMessage());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+	}
 
 	/**
 	 * Test Bad configuration
