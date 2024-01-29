@@ -26,7 +26,6 @@ package org.eclipse.tracecompass.trace_event_logger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -41,13 +40,12 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
-import java.util.logging.XMLFormatter;
 
 import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
 
 /**
  * Asynchronous File Handler for JUL.
- * 
+ *
  * This takes the burden of IO and puts it in a worker thread. In stress tests,
  * it is able to have a throughput orders of magnitude greater than the classic
  * {@link FileHandler}. There are caveats though, it requires more CPU time and
@@ -55,7 +53,7 @@ import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
  * saturated, when this happens the main program may freeze for several
  * milliseconds. Finally, if the worker is still running when the program exist,
  * it will drop anything not written to disk.
- * 
+ *
  * Parameters to set in logging.properties:
  * <ul>
  * <li>&lt;FileHandler&gt;.level specifies the default level for the
@@ -88,238 +86,261 @@ import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
  * </ul>
  */
 public class AsyncFileHandler extends StreamHandler {
-	private static final LogRecord closeEvent = new LogRecord(Level.FINEST, "close");
-	private FileHandler fileHandler;
-	private BlockingQueue<List<LogRecord>> queue;
-	private Thread writerThread;
-	private int maxSize = 1024;
-	private int queueDepth = 10000;
-	private int flushRate = 1000;
-	private String encoding;
-	private Filter filter;
-	private ErrorManager errorManager;
-	private Formatter formatter;
-	private Level level;
+    private static final LogRecord closeEvent = new LogRecord(Level.FINEST, "close"); //$NON-NLS-1$
+    private FileHandler fFileHandler;
+    private BlockingQueue<List<LogRecord>> fQueue;
+    private Thread fWriterThread;
+    private int fMaxSize = 1024;
+    private int fQueueDepth = 10000;
+    private int fFlushRate = 1000;
+    private String fEncoding;
+    private Filter fFilter;
+    private ErrorManager fErrorManager;
+    private Formatter fFormatter;
+    private Level fLevel;
 
-	private List<LogRecord> recordBuffer = new ArrayList<>(maxSize);
-	private Timer timer = new Timer(false);
-	TimerTask task = new TimerTask() {
-		@Override
-		public void run() {
-			if (!recordBuffer.isEmpty()) {
-				flush();
-			}
-		}
-	};
+    private List<LogRecord> fRecordBuffer = new ArrayList<>(fMaxSize);
+    private Timer fTimer = new Timer(false);
+    TimerTask fTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (!fRecordBuffer.isEmpty()) {
+                flush();
+            }
+        }
+    };
 
-	private void configure() {
-		LogManager manager = LogManager.getLogManager();
+    private void configure() {
+        LogManager manager = LogManager.getLogManager();
 
-		String cname = getClass().getName();
-		String prop = manager.getProperty(cname + ".maxSize");
-		maxSize = 1024;
-		try {
-			maxSize = Integer.parseInt(prop.trim());
-		} catch (Exception ex) {
-			// we tried!
-		}
-		if (maxSize < 0) {
-			maxSize = 1024;
-		}
-		queueDepth = 10000;
-		prop = manager.getProperty(cname + ".queueDepth");
-		try {
-			queueDepth = Integer.parseInt(prop.trim());
-		} catch (Exception ex) {
-			// we tried!
-		}
-		if (queueDepth < 0) {
-			queueDepth = 10000;
-		}
-		flushRate = 1000;
-		prop = manager.getProperty(cname + ".formatter");
-		try {
-			formatter = (Formatter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
-		} catch (Exception e) {
-			// we tried!
-		}
-		prop = manager.getProperty(cname + ".filter");
-		try {
-			filter = (Filter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
-		} catch (Exception e) {
-			// we tried!
-		}
-		
-		prop = manager.getProperty(cname + ".encoding");
-		try {
-			setEncoding(prop);
-		} catch (Exception e) {
-			// we tried!
-		}
-		
-		
-		prop = manager.getProperty(cname + ".flushRate");
-		try {
-			flushRate = Integer.parseInt(prop.trim());
-		} catch (Exception ex) {
-			// we tried!
-		}
-		if (flushRate < 0) {
-			flushRate = 1000;
-		}
-	}
+        String cname = getClass().getName();
+        String prop = manager.getProperty(cname + ".maxSize"); //$NON-NLS-1$
+        fMaxSize = 1024;
+        try {
+            fMaxSize = Integer.parseInt(prop.trim());
+        } catch (Exception ex) {
+            // we tried!
+        }
+        if (fMaxSize < 0) {
+            fMaxSize = 1024;
+        }
+        fQueueDepth = 10000;
+        prop = manager.getProperty(cname + ".queueDepth"); //$NON-NLS-1$
+        try {
+            fQueueDepth = Integer.parseInt(prop.trim());
+        } catch (Exception ex) {
+            // we tried!
+        }
+        if (fQueueDepth < 0) {
+            fQueueDepth = 10000;
+        }
+        fFlushRate = 1000;
+        prop = manager.getProperty(cname + ".formatter"); //$NON-NLS-1$
+        try {
+            fFormatter = (Formatter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            // we tried!
+        }
+        prop = manager.getProperty(cname + ".filter"); //$NON-NLS-1$
+        try {
+            fFilter = (Filter) ClassLoader.getSystemClassLoader().loadClass(prop).getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            // we tried!
+        }
 
-	public AsyncFileHandler() throws SecurityException, IOException {
-		this(""); // let's hope it's configured in logging properties.
-	}
+        prop = manager.getProperty(cname + ".encoding"); //$NON-NLS-1$
+        try {
+            setEncoding(prop);
+        } catch (Exception e) {
+            // we tried!
+        }
 
-	/**
-	 * Asynchronous file handler, wraps a {@link FileHandler} behind a thread
-	 * 
-	 * @param pattern the file pattern
-	 * @throws SecurityException
-	 * @throws IOException
-	 */
-	public AsyncFileHandler(String pattern) throws SecurityException, IOException {
-		configure();
-		fileHandler = new FileHandler(pattern);
-		if (encoding != null)
-			fileHandler.setEncoding(encoding);
-		if (errorManager != null)
-			fileHandler.setErrorManager(errorManager);
-		if (filter != null)
-			fileHandler.setFilter(filter);
-		if (level != null)
-			fileHandler.setLevel(level);
-		if (formatter != null)
-			fileHandler.setFormatter(formatter);
+        prop = manager.getProperty(cname + ".flushRate"); //$NON-NLS-1$
+        try {
+            fFlushRate = Integer.parseInt(prop.trim());
+        } catch (Exception ex) {
+            // we tried!
+        }
+        if (fFlushRate < 0) {
+            fFlushRate = 1000;
+        }
+    }
 
-		queue = new ArrayBlockingQueue<>(queueDepth);
-		timer.scheduleAtFixedRate(task, flushRate, flushRate);
-		writerThread = new Thread(() -> {
-			try {
-				while (true) {
-					List<LogRecord> logRecords = queue.take();
-					for (LogRecord logRecord : logRecords) {
-						if (logRecord == closeEvent) {
-							fileHandler.flush();
-							fileHandler.close();
-							return;
-						} else {
-							fileHandler.publish(logRecord);
-						}
-					}
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-		});
-		writerThread.setName("AsyncFileHandler Writer");
-		writerThread.start();
-	}
+    /**
+     * Default Constructor
+     *
+     * @throws SecurityException
+     *             if a security manager exists and if the caller does not have
+     *             LoggingPermission("control").
+     * @throws IOException
+     *             if there are IO problems opening the files.
+     */
+    public AsyncFileHandler() throws SecurityException, IOException {
+        this(""); // let's hope it's configured in logging //$NON-NLS-1$
+                  // properties.
+    }
 
-	@Override
-	public synchronized void setEncoding(String encoding) throws SecurityException, UnsupportedEncodingException {
-		if (fileHandler != null)
-			fileHandler.setEncoding(encoding);
-		this.encoding = encoding;
-	}
+    /**
+     * Asynchronous file handler, wraps a {@link FileHandler} behind a thread
+     *
+     * @param pattern
+     *            the file pattern
+     * @throws SecurityException
+     *             if a security manager exists and if the caller does not have
+     *             LoggingPermission("control").
+     * @throws IOException
+     *             if there are IO problems opening the files.
+     */
+    public AsyncFileHandler(String pattern) throws SecurityException, IOException {
+        configure();
+        fFileHandler = new FileHandler(pattern);
+        if (fEncoding != null) {
+            fFileHandler.setEncoding(fEncoding);
+        }
+        if (fErrorManager != null) {
+            fFileHandler.setErrorManager(fErrorManager);
+        }
+        if (fFilter != null) {
+            fFileHandler.setFilter(fFilter);
+        }
+        if (fLevel != null) {
+            fFileHandler.setLevel(fLevel);
+        }
+        if (fFormatter != null) {
+            fFileHandler.setFormatter(fFormatter);
+        }
 
-	@Override
-	public synchronized void setErrorManager(ErrorManager em) {
-		if (fileHandler != null)
-			fileHandler.setErrorManager(em);
-		this.errorManager = em;
-	}
+        fQueue = new ArrayBlockingQueue<>(fQueueDepth);
+        fTimer.scheduleAtFixedRate(fTask, fFlushRate, fFlushRate);
+        fWriterThread = new Thread(() -> {
+            try {
+                while (true) {
+                    List<LogRecord> logRecords = fQueue.take();
+                    for (LogRecord logRecord : logRecords) {
+                        if (logRecord == closeEvent) {
+                            fFileHandler.flush();
+                            fFileHandler.close();
+                            return;
+                        }
+                        fFileHandler.publish(logRecord);
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        fWriterThread.setName("AsyncFileHandler Writer"); //$NON-NLS-1$
+        fWriterThread.start();
+    }
 
-	@Override
-	public synchronized void setFilter(Filter newFilter) throws SecurityException {
-		if (fileHandler != null)
-			fileHandler.setFilter(newFilter);
-		this.filter = newFilter;
-	}
+    @Override
+    public synchronized void setEncoding(String encoding) throws SecurityException, UnsupportedEncodingException {
+        if (fFileHandler != null) {
+            fFileHandler.setEncoding(encoding);
+        }
+        this.fEncoding = encoding;
+    }
 
-	@Override
-	public synchronized void setFormatter(Formatter newFormatter) throws SecurityException {
-		if (fileHandler != null)
-			fileHandler.setFormatter(newFormatter);
-		this.formatter = newFormatter;
-	}
+    @Override
+    public synchronized void setErrorManager(ErrorManager em) {
+        if (fFileHandler != null) {
+            fFileHandler.setErrorManager(em);
+        }
+        this.fErrorManager = em;
+    }
 
-	@Override
-	public synchronized void setLevel(Level newLevel) throws SecurityException {
-		if (fileHandler != null)
-			fileHandler.setLevel(newLevel);
-		this.level = newLevel;
-	}
+    @Override
+    public synchronized void setFilter(Filter newFilter) throws SecurityException {
+        if (fFileHandler != null) {
+            fFileHandler.setFilter(newFilter);
+        }
+        this.fFilter = newFilter;
+    }
 
-	@Override
-	public synchronized void close() throws SecurityException {
-		try {
-			recordBuffer.add(closeEvent);
-			queue.put(recordBuffer);
-			writerThread.join();
-			timer.cancel();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		super.close();
-	}
+    @Override
+    public synchronized void setFormatter(Formatter newFormatter) throws SecurityException {
+        if (fFileHandler != null) {
+            fFileHandler.setFormatter(newFormatter);
+        }
+        this.fFormatter = newFormatter;
+    }
 
-	@Override
-	public synchronized void flush() {
-		try {
-			queue.put(recordBuffer);
-			recordBuffer = new ArrayList<>(maxSize);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
+    @Override
+    public synchronized void setLevel(Level newLevel) throws SecurityException {
+        if (fFileHandler != null) {
+            fFileHandler.setLevel(newLevel);
+        }
+        this.fLevel = newLevel;
+    }
 
-	@Override
-	public Filter getFilter() {
-		return fileHandler.getFilter();
-	}
+    @Override
+    public synchronized void close() throws SecurityException {
+        try {
+            fRecordBuffer.add(closeEvent);
+            fQueue.put(fRecordBuffer);
+            fWriterThread.join();
+            fTimer.cancel();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        super.close();
+    }
 
-	@Override
-	public String getEncoding() {
-		return fileHandler.getEncoding();
-	}
+    @Override
+    public synchronized void flush() {
+        try {
+            fQueue.put(fRecordBuffer);
+            fRecordBuffer = new ArrayList<>(fMaxSize);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
-	@Override
-	public Formatter getFormatter() {
-		return fileHandler.getFormatter();
-	}
+    @Override
+    public Filter getFilter() {
+        return fFileHandler.getFilter();
+    }
 
-	@Override
-	public Level getLevel() {
-		return fileHandler.getLevel();
-	}
+    @Override
+    public String getEncoding() {
+        return fFileHandler.getEncoding();
+    }
 
-	/**
-	 * Override me please
-	 */
-	@Override
-	public boolean isLoggable(LogRecord record) {
-		return super.isLoggable(record) && (record instanceof TraceEventLogRecord); // add feature switch here
-	}
+    @Override
+    public Formatter getFormatter() {
+        return fFileHandler.getFormatter();
+    }
 
-	@Override
-	public ErrorManager getErrorManager() {
-		return fileHandler.getErrorManager();
-	}
+    @Override
+    public Level getLevel() {
+        return fFileHandler.getLevel();
+    }
 
-	@Override
-	public synchronized void publish(LogRecord record) {
-		try {
-			recordBuffer.add(record);
-			if (recordBuffer.size() >= maxSize && isLoggable(record)) {
-				queue.put(recordBuffer);
-				recordBuffer = new ArrayList<>(maxSize);
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
+    /**
+     * Override me please
+     */
+    @Override
+    public boolean isLoggable(LogRecord record) {
+        // add feature switch here
+        return super.isLoggable(record) && (record instanceof TraceEventLogRecord);
+    }
+
+    @Override
+    public ErrorManager getErrorManager() {
+        return fFileHandler.getErrorManager();
+    }
+
+    @Override
+    public synchronized void publish(LogRecord record) {
+        try {
+            fRecordBuffer.add(record);
+            if (fRecordBuffer.size() >= fMaxSize && isLoggable(record)) {
+                fQueue.put(fRecordBuffer);
+                fRecordBuffer = new ArrayList<>(fMaxSize);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
 }

@@ -54,11 +54,11 @@ public class LoggerTest {
 
     private static String eventWithNoTs(String event) {
         //"ts":["1530079243191"],"ph":"E","tid":1,"p...>
-        return event.replaceFirst("\\\"ts\\\"\\:\\\"\\d*\\.?\\d*\\\"", "\"ts\":0");
+        return event.replaceFirst("\\\"ts\\\"\\:\\\"\\d*\\.?\\d*\\\"", "\"ts\":0"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private static String eventUnifyId(String event) {
-        return event.replaceFirst("\\\"id\\\"\\:\\\"0x[0-9A-Fa-f]+\\\"", "\"id\":\"0x1234\"");
+        return event.replaceFirst("\\\"id\\\"\\:\\\"0x[0-9A-Fa-f]+\\\"", "\"id\":\"0x1234\""); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private static class StringOutputStream extends OutputStream {
@@ -121,13 +121,13 @@ public class LoggerTest {
     public void testHelloWorld() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "world")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "world")) { //$NON-NLS-1$
             // do something
             new Object();
         }
         fStreamHandler.flush();
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"world\"}", fLog.getMessages().get(0));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(1));
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"world\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(1)); //$NON-NLS-1$
     }
 
     /**
@@ -137,19 +137,19 @@ public class LoggerTest {
     public void testNesting() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "foo")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "foo")) { //$NON-NLS-1$
             // do something
             new Object();
-            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.INFO, "bar")) {
+            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.INFO, "bar")) { //$NON-NLS-1$
                 // do something
                 new Object();
             }
         }
         fStreamHandler.flush();
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     /**
@@ -159,23 +159,23 @@ public class LoggerTest {
     public void testNestingFiltered() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) { //$NON-NLS-1$
             // do something
             new Object();
-            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) {
+            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINER, "bar")) { //$NON-NLS-1$
                 // do something
                 new Object();
-                try (LogUtils.ScopeLog log2 = new LogUtils.ScopeLog(logger, Level.FINEST, "baz")) {
+                try (LogUtils.ScopeLog log2 = new LogUtils.ScopeLog(logger, Level.FINEST, "baz")) { //$NON-NLS-1$
                     // do something
                     new Object();
                 }
             }
         }
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     /**
@@ -185,18 +185,18 @@ public class LoggerTest {
     public void testNestingLogLevels() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo")) {
-            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINE, "bar")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo")) { //$NON-NLS-1$
+            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINE, "bar")) { //$NON-NLS-1$
                 // do something
                 new Object();
             }
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     /**
@@ -206,18 +206,18 @@ public class LoggerTest {
     public void testNestingWithData() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo")) {
-            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINE, "bar")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo")) { //$NON-NLS-1$
+            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.FINE, "bar")) { //$NON-NLS-1$
                 // do something
-                log1.addData("return", false);
+                log1.addData("return", false); //$NON-NLS-1$
             }
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1,\"args\":{\"return\":\"false\"}}", fLog.getMessages().get(2));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1,\"args\":{\"return\":\"false\"}}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     /**
@@ -227,25 +227,25 @@ public class LoggerTest {
     public void testFlowFiltered() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.FINE, "foo").setCategory("mycat").build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.FINE, "foo").setCategory("mycat").build()) { //$NON-NLS-1$ //$NON-NLS-2$
             // do something
             new Object();
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINER, "bar", "big", "ben").setParentScope(log).build()) {
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINER, "bar", "big", "ben").setParentScope(log).build()) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 // do something
                 new Object();
-                try (FlowScopeLog log2 = new FlowScopeLogBuilder(logger, Level.FINEST, "baz").setParentScope(log1).build()) {
+                try (FlowScopeLog log2 = new FlowScopeLogBuilder(logger, Level.FINEST, "baz").setParentScope(log1).build()) { //$NON-NLS-1$
                     // do something
                     new Object();
                 }
             }
         }
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mycat\",\"id\":\"0x1234\"}", fLog.getMessages().get(1));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"args\":{\"big\":\"ben\"}}", fLog.getMessages().get(2));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mycat\",\"id\":\"0x1234\",\"args\":{\"big\":\"ben\"}}", fLog.getMessages().get(3));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(4));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mycat\",\"id\":\"0x1234\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"args\":{\"big\":\"ben\"}}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mycat\",\"id\":\"0x1234\",\"args\":{\"big\":\"ben\"}}", fLog.getMessages().get(3)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(4)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5)); //$NON-NLS-1$
     }
 
     /**
@@ -255,23 +255,23 @@ public class LoggerTest {
     public void testFlowLogLevels() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("mydog").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).build()) {
-                log1.step("barked");
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("mydog").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).build()) { //$NON-NLS-1$
+                log1.step("barked"); //$NON-NLS-1$
                 new Object();
             }
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mydog\",\"id\":\"0x1234\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", //$NON-NLS-1$
                 fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}",
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", //$NON-NLS-1$
                 fLog.getMessages().get(2));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(3));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"barked\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(4));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(6));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(3)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"barked\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(4)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5)); //$NON-NLS-1$
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(6)); //$NON-NLS-1$
     }
 
     /**
@@ -281,23 +281,23 @@ public class LoggerTest {
     public void testFlowWithUnsetParent() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("mydog").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategoryAndId("mydog", log.getId()).build()) {
-                log1.step("barked");
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("mydog").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategoryAndId("mydog", log.getId()).build()) { //$NON-NLS-1$ //$NON-NLS-2$
+                log1.step("barked"); //$NON-NLS-1$
                 new Object();
             }
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mydog\",\"id\":\"0x1234\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", //$NON-NLS-1$
                 fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}",
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", //$NON-NLS-1$
                 fLog.getMessages().get(2));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(3));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"barked\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(4));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(6));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(3)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"barked\",\"cat\":\"mydog\",\"id\":\"0x1234\"}", fLog.getMessages().get(4)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5)); //$NON-NLS-1$
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(6)); //$NON-NLS-1$
     }
 
     /**
@@ -307,22 +307,22 @@ public class LoggerTest {
     public void testFlowWithData() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).build()) { //$NON-NLS-1$
                 // do something
-                log1.addData("return", false);
+                log1.addData("return", false); //$NON-NLS-1$
             }
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"myspider\",\"id\":\"0x1234\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"myspider\",\"id\":\"0x1234\"}", //$NON-NLS-1$
                 fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}",
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", //$NON-NLS-1$
                 fLog.getMessages().get(2));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"myspider\",\"id\":\"0x1234\"}", fLog.getMessages().get(3));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1,\"args\":{\"return\":\"false\"}}", fLog.getMessages().get(4));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"t\",\"tid\":1,\"pid\":1,\"name\":\"bar\",\"cat\":\"myspider\",\"id\":\"0x1234\"}", fLog.getMessages().get(3)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1,\"args\":{\"return\":\"false\"}}", fLog.getMessages().get(4)); //$NON-NLS-1$
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5)); //$NON-NLS-1$
     }
 
     /**
@@ -333,16 +333,16 @@ public class LoggerTest {
     public void testFlowBuilderNoExtra() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").build()) { //$NON-NLS-1$
             // do something
             new Object();
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"null\",\"id\":\"0x1234\"}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"s\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"cat\":\"null\",\"id\":\"0x1234\"}", //$NON-NLS-1$
                 fLog.getMessages().get(1));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2));
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2)); //$NON-NLS-1$
     }
 
     /**
@@ -354,8 +354,8 @@ public class LoggerTest {
     public void testFlowBuilderCatThenParent() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).setCategory("myspider").build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 // do something
                 new Object();
             }
@@ -371,14 +371,14 @@ public class LoggerTest {
     public void testFlowBuilderParentThenCat() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategory("myspider").setParentScope(log).build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategory("myspider").setParentScope(log).build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 // do something
                 new Object();
             }
         }
     }
-    
+
 
     /**
      * Test the flow scope builder calling
@@ -389,8 +389,8 @@ public class LoggerTest {
     public void testFlowBuilderParentThenCatId() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).setCategoryAndId("myspider",1).build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setParentScope(log).setCategoryAndId("myspider",1).build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 // do something
                 new Object();
             }
@@ -406,15 +406,15 @@ public class LoggerTest {
     public void testFlowBuilderCatIdThenParent() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) {
-            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategoryAndId("myspider",1).setParentScope(log).build()) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(logger, Level.WARNING, "foo").setCategory("myspider").build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog log1 = new FlowScopeLogBuilder(logger, Level.FINE, "bar").setCategoryAndId("myspider",1).setParentScope(log).build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 // do something
                 new Object();
             }
         }
     }
 
-    
+
     /**
      * Test nesting with different arguments
      */
@@ -422,30 +422,30 @@ public class LoggerTest {
     public void testAttributes() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple", "Apple:Pen")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple", "Apple:Pen")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             // do something
             new Object();
         }
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple:Apple:Pen")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple:Apple:Pen")) { //$NON-NLS-1$ //$NON-NLS-2$
             // do something
             new Object();
         }
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "pen", "pineapple", "apple", "pen", "number_of_badgers", 12)) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "pen", "pineapple", "apple", "pen", "number_of_badgers", 12)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             // do something
             new Object();
         }
         fStreamHandler.flush();
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"Pen:Pineapple\":\"Apple:Pen\"}}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"Pen:Pineapple\":\"Apple:Pen\"}}", //$NON-NLS-1$
                 fLog.getMessages().get(0));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(1));
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(1)); //$NON-NLS-1$
 
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"msg\":\"Pen:Pineapple:Apple:Pen\"}}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"msg\":\"Pen:Pineapple:Apple:Pen\"}}", //$NON-NLS-1$
                 fLog.getMessages().get(2));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
 
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"pen\":\"pineapple\",\"apple\":\"pen\",\"number_of_badgers\":12}}",
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\",\"args\":{\"pen\":\"pineapple\",\"apple\":\"pen\",\"number_of_badgers\":12}}", //$NON-NLS-1$
                 fLog.getMessages().get(4));
-        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5));
+        assertEquals("WARNING: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(5)); //$NON-NLS-1$
     }
 
     /**
@@ -455,9 +455,9 @@ public class LoggerTest {
     public void testAttributeFail3Args() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple", "Apple", "Pen")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "Pen:Pineapple", "Apple", "Pen")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             // do something
-            fail("Should be giving an IllegalArgumentException");
+            fail("Should be giving an IllegalArgumentException"); //$NON-NLS-1$
         } catch (IllegalArgumentException e) {
         	// pass
         }
@@ -470,9 +470,9 @@ public class LoggerTest {
     public void testAttributeFailRepeatedArgs() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "badger", "badger", "badger", "badger")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.WARNING, "foo", "badger", "badger", "badger", "badger")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
             // do something
-            fail("Should be giving an IllegalArgumentException");
+            fail("Should be giving an IllegalArgumentException"); //$NON-NLS-1$
         } catch (IllegalArgumentException e) {
 			// pass
 		}
@@ -485,20 +485,20 @@ public class LoggerTest {
     public void testNestingException() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "foo")) {
-            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.INFO, "bar")) {
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.INFO, "foo")) { //$NON-NLS-1$
+            try (LogUtils.ScopeLog log1 = new LogUtils.ScopeLog(logger, Level.INFO, "bar")) { //$NON-NLS-1$
                 // do something
                 new Object();
-                throw new Exception("test");
+                throw new Exception("test"); //$NON-NLS-1$
             }
         } catch (Exception e) {
-            assertEquals("test", e.getMessage());
+            assertEquals("test", e.getMessage()); //$NON-NLS-1$
         }
         fStreamHandler.flush();
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3));
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"foo\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"B\",\"tid\":1,\"pid\":1,\"name\":\"bar\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"E\",\"tid\":1,\"pid\":1}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     private static final class LivingObject {
@@ -510,6 +510,7 @@ public class LoggerTest {
             LogUtils.traceObjectCreation(fLog, Level.FINE, this);
         }
 
+        @SuppressWarnings("removal")
         @Override
         protected void finalize() throws Throwable {
             LogUtils.traceObjectDestruction(fLog, Level.FINE, this);
@@ -540,10 +541,10 @@ public class LoggerTest {
         }
 
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(0));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(1));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(2));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(3));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"LivingObject\",\"id\":\"0x1234\"}", fLog.getMessages().get(3)); //$NON-NLS-1$
     }
 
     /**
@@ -556,17 +557,17 @@ public class LoggerTest {
         {
             List<String> avengers = new ArrayList<>();
             int uniqueID = LogUtils.traceObjectCreation(logger, Level.FINE, avengers);
-            avengers.add("Cap");
-            avengers.add("Arrow");
-            avengers.add("Thor");
-            avengers.add("Iron");
+            avengers.add("Cap"); //$NON-NLS-1$
+            avengers.add("Arrow"); //$NON-NLS-1$
+            avengers.add("Thor"); //$NON-NLS-1$
+            avengers.add("Iron"); //$NON-NLS-1$
             LogUtils.traceObjectDestruction(logger, Level.FINE, avengers, uniqueID);
 
         }
 
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"ArrayList\",\"id\":\"0x1234\"}", fLog.getMessages().get(0));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"ArrayList\",\"id\":\"0x1234\"}", fLog.getMessages().get(1));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"N\",\"tid\":1,\"pid\":1,\"name\":\"ArrayList\",\"id\":\"0x1234\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"D\",\"tid\":1,\"pid\":1,\"name\":\"ArrayList\",\"id\":\"0x1234\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
     }
 
     /**
@@ -576,9 +577,9 @@ public class LoggerTest {
     public void testInstant() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        LogUtils.traceInstant(logger, Level.FINE, "hello", "foo", "bar");
+        LogUtils.traceInstant(logger, Level.FINE, "hello", "foo", "bar"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"hello\",\"args\":{\"foo\":\"bar\"}}", fLog.getMessages().get(0));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"hello\",\"args\":{\"foo\":\"bar\"}}", fLog.getMessages().get(0)); //$NON-NLS-1$
     }
 
     /**
@@ -588,24 +589,24 @@ public class LoggerTest {
     public void testAsyncMessages() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        LogUtils.traceAsyncStart(logger, Level.FINE, "network connect", "net", 10);
-        LogUtils.traceAsyncStart(logger, Level.FINER, "network lookup", "net", 10);
-        LogUtils.traceAsyncNested(logger, Level.FINER, "network cache", "net", 10);
+        LogUtils.traceAsyncStart(logger, Level.FINE, "network connect", "net", 10); //$NON-NLS-1$ //$NON-NLS-2$
+        LogUtils.traceAsyncStart(logger, Level.FINER, "network lookup", "net", 10); //$NON-NLS-1$ //$NON-NLS-2$
+        LogUtils.traceAsyncNested(logger, Level.FINER, "network cache", "net", 10); //$NON-NLS-1$ //$NON-NLS-2$
         // anon message
         LogUtils.traceAsyncStart(logger, Level.FINER, null, null, 0);
         LogUtils.traceAsyncEnd(logger, Level.FINER, null, null, 0);
 
-        LogUtils.traceAsyncEnd(logger, Level.FINER, "network lookup", "net", 10, "OK");
-        LogUtils.traceAsyncEnd(logger, Level.FINE, "network connect", "net", 10, "OK");
+        LogUtils.traceAsyncEnd(logger, Level.FINER, "network lookup", "net", 10, "OK"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        LogUtils.traceAsyncEnd(logger, Level.FINE, "network connect", "net", 10, "OK"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         fStreamHandler.flush();
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"name\":\"network connect\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(0));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"name\":\"network lookup\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(1));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"n\",\"tid\":1,\"pid\":1,\"name\":\"network cache\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(2));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"id\":\"0x1234\"}", fLog.getMessages().get(3));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"id\":\"0x1234\"}", fLog.getMessages().get(4));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"name\":\"network lookup\",\"cat\":\"net\",\"id\":\"0x1234\",\"args\":{\"msg\":\"OK\"}}", fLog.getMessages().get(5));
-        assertEquals("FINE: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"name\":\"network connect\",\"cat\":\"net\",\"id\":\"0x1234\",\"args\":{\"msg\":\"OK\"}}", fLog.getMessages().get(6));
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"name\":\"network connect\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"name\":\"network lookup\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"n\",\"tid\":1,\"pid\":1,\"name\":\"network cache\",\"cat\":\"net\",\"id\":\"0x1234\"}", fLog.getMessages().get(2)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"b\",\"tid\":1,\"pid\":1,\"id\":\"0x1234\"}", fLog.getMessages().get(3)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"id\":\"0x1234\"}", fLog.getMessages().get(4)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"name\":\"network lookup\",\"cat\":\"net\",\"id\":\"0x1234\",\"args\":{\"msg\":\"OK\"}}", fLog.getMessages().get(5)); //$NON-NLS-1$
+        assertEquals("FINE: {\"ts\":0,\"ph\":\"e\",\"tid\":1,\"pid\":1,\"name\":\"network connect\",\"cat\":\"net\",\"id\":\"0x1234\",\"args\":{\"msg\":\"OK\"}}", fLog.getMessages().get(6)); //$NON-NLS-1$
     }
 
     /**
@@ -615,12 +616,12 @@ public class LoggerTest {
     public void testNullArguments() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        LogUtils.traceInstant(logger, Level.INFO, "test null value", "nullvalue", null);
-        LogUtils.traceInstant(logger, Level.INFO, "test null key", null, "value");
+        LogUtils.traceInstant(logger, Level.INFO, "test null value", "nullvalue", null); //$NON-NLS-1$ //$NON-NLS-2$
+        LogUtils.traceInstant(logger, Level.INFO, "test null key", null, "value"); //$NON-NLS-1$ //$NON-NLS-2$
 
         fStreamHandler.flush();
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"test null value\",\"args\":{\"nullvalue\":\"null\"}}", fLog.getMessages().get(0));
-        assertEquals("INFO: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"test null key\",\"args\":{\"null\":\"value\"}}", fLog.getMessages().get(1));
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"test null value\",\"args\":{\"nullvalue\":\"null\"}}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("INFO: {\"ts\":0,\"ph\":\"i\",\"tid\":1,\"pid\":1,\"name\":\"test null key\",\"args\":{\"null\":\"value\"}}", fLog.getMessages().get(1)); //$NON-NLS-1$
     }
 
     /**
@@ -631,14 +632,14 @@ public class LoggerTest {
         Logger logger = fLogger;
         assertNotNull(logger);
 
-        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 0);
-        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 10);
-        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 0);
+        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 0); //$NON-NLS-1$ //$NON-NLS-2$
+        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 10); //$NON-NLS-1$ //$NON-NLS-2$
+        LogUtils.traceCounter(logger, Level.FINER, "counter", "cats", 0); //$NON-NLS-1$ //$NON-NLS-2$
 
         fStreamHandler.flush();
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":0}}", fLog.getMessages().get(0));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":10}}", fLog.getMessages().get(1));
-        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":0}}", fLog.getMessages().get(2));
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":0}}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":10}}", fLog.getMessages().get(1)); //$NON-NLS-1$
+        assertEquals("FINER: {\"ts\":0,\"ph\":\"C\",\"tid\":1,\"pid\":1,\"name\":\"counter\",\"args\":{\"cats\":0}}", fLog.getMessages().get(2)); //$NON-NLS-1$
     }
 
     /**
@@ -648,11 +649,11 @@ public class LoggerTest {
     public void testMarker() {
         Logger logger = fLogger;
         assertNotNull(logger);
-        LogUtils.traceMarker(logger, Level.CONFIG, "instant", 0);
-        LogUtils.traceMarker(logger, Level.CONFIG, "colored", 15, "color", 0xaabccdd);
+        LogUtils.traceMarker(logger, Level.CONFIG, "instant", 0); //$NON-NLS-1$
+        LogUtils.traceMarker(logger, Level.CONFIG, "colored", 15, "color", 0xaabccdd); //$NON-NLS-1$ //$NON-NLS-2$
         fStreamHandler.flush();
-        assertEquals("CONFIG: {\"ts\":0,\"ph\":\"R\",\"tid\":1,\"pid\":1,\"name\":\"instant\",\"dur\":0}", fLog.getMessages().get(0));
-        assertEquals("CONFIG: {\"ts\":0,\"ph\":\"R\",\"tid\":1,\"pid\":1,\"name\":\"colored\",\"dur\":15,\"args\":{\"color\":179031261}}", fLog.getMessages().get(1));
+        assertEquals("CONFIG: {\"ts\":0,\"ph\":\"R\",\"tid\":1,\"pid\":1,\"name\":\"instant\",\"dur\":0}", fLog.getMessages().get(0)); //$NON-NLS-1$
+        assertEquals("CONFIG: {\"ts\":0,\"ph\":\"R\",\"tid\":1,\"pid\":1,\"name\":\"colored\",\"dur\":15,\"args\":{\"color\":179031261}}", fLog.getMessages().get(1)); //$NON-NLS-1$
     }
 
 }

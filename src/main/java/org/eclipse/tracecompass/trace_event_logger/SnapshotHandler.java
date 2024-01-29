@@ -57,11 +57,11 @@ import org.eclipse.tracecompass.trace_event_logger.LogUtils.TraceEventLogRecord;
 public class SnapshotHandler extends FileHandler {
 
 	// the following can be configured by Logging.properties
-	private int maxEvents = 1000000;
-	private double timeout = 30.0;
-	protected String filePath = "request-"; //$NON-NLS-1$
+	private int fMaxEvents = 1000000;
+	private double fTimeout = 30.0;
+	protected String fFilePath = "request-"; //$NON-NLS-1$
 	// Enable scope logs by default
-	private volatile boolean isEnabled = true;
+	private volatile boolean fIsEnabled = true;
 
 	private Deque<InnerEvent> fData = new ArrayDeque<>();
 	private Map<String, Map<String, List<InnerEvent>>> fStacks = new HashMap<>();
@@ -89,7 +89,7 @@ public class SnapshotHandler extends FileHandler {
 		super();
 		configure();
 		if (timeout > 0.0) {
-			this.timeout = timeout;
+			this.fTimeout = timeout;
 		}
 	}
 
@@ -98,29 +98,29 @@ public class SnapshotHandler extends FileHandler {
 
 		String cname = getClass().getName();
 		String prop = manager.getProperty(cname + ".maxEvents");
-		maxEvents = 1000000;
+		fMaxEvents = 1000000;
 		try {
-			maxEvents = Integer.parseInt(prop.trim());
+			fMaxEvents = Integer.parseInt(prop.trim());
 		} catch (Exception ex) {
 			// we tried!
 		}
-		if (maxEvents < 0) {
-			maxEvents = 1000000;
+		if (fMaxEvents < 0) {
+			fMaxEvents = 1000000;
 		}
-		timeout = 10000;
+		fTimeout = 10000;
 		prop = manager.getProperty(cname + ".timeout");
 		try {
-			timeout = Double.parseDouble(prop.trim());
+			fTimeout = Double.parseDouble(prop.trim());
 		} catch (Exception ex) {
 			// we tried!
 		}
-		if (timeout < 0) {
-			timeout = 30.0;
+		if (fTimeout < 0) {
+			fTimeout = 30.0;
 		}
-		filePath = "request-";
+		fFilePath = "request-";
 		prop = manager.getProperty(cname + ".filePath");
 		try {
-			filePath = prop.trim();
+			fFilePath = prop.trim();
 		} catch (Exception ex) {
 			// we tried!
 		}
@@ -128,7 +128,7 @@ public class SnapshotHandler extends FileHandler {
 
 	@Override
 	public boolean isLoggable(LogRecord record) {
-		return (isEnabled && record != null && super.isLoggable(record)
+		return (fIsEnabled && record != null && super.isLoggable(record)
 				&& (record.getLevel().intValue() <= Level.FINE.intValue()) && (record instanceof TraceEventLogRecord)); // add
 																														// feature
 																														// switch
@@ -141,7 +141,7 @@ public class SnapshotHandler extends FileHandler {
 			return false;
 		}
 		fData.add(event);
-		while (fData.size() > maxEvents) {
+		while (fData.size() > fMaxEvents) {
 			fData.remove();
 		}
 		Map<String, List<InnerEvent>> pidMap = fStacks.computeIfAbsent(event.getPid(), unused -> new HashMap<>());
@@ -158,7 +158,7 @@ public class SnapshotHandler extends FileHandler {
 			InnerEvent lastEvent = stack.remove(stack.size() - 1);
 			if (stack.isEmpty()) {
 				double delta = (event.getTs() - lastEvent.getTs()) * 0.000001; // convert to seconds
-				if (delta > timeout) {
+				if (delta > fTimeout) {
 					drain(fData);
 				}
 			}
@@ -180,7 +180,7 @@ public class SnapshotHandler extends FileHandler {
 
 	private void drain(Deque<InnerEvent> data) {
 		Thread thread = new Thread(() -> {
-			Path path = new File(filePath + Long.toString((long) data.getFirst().getTs()) + ".json").toPath(); //$NON-NLS-1$
+			Path path = new File(fFilePath + Long.toString((long) data.getFirst().getTs()) + ".json").toPath(); //$NON-NLS-1$
 			try (BufferedWriter fw = Files.newBufferedWriter(path, Charset.defaultCharset())) {
 				fw.write('[');
 				boolean first = true;
@@ -209,7 +209,7 @@ public class SnapshotHandler extends FileHandler {
 	 * @param isEnabled true is enabled, false is disabled
 	 */
 	public void setEnabled(Boolean isEnabled) {
-		this.isEnabled = isEnabled;
+		this.fIsEnabled = isEnabled;
 	}
 
 	/**
@@ -218,6 +218,6 @@ public class SnapshotHandler extends FileHandler {
 	 * @return true if enabled
 	 */
 	public boolean isEnabled() {
-		return isEnabled;
+		return fIsEnabled;
 	}
 }

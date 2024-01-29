@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * Note: this was TraceCompassLogUtil copied as-is. It is relicensed to MIT,
  * permissions from all contributing parties were obtained. This is used for
  * testing purposes only.
- * 
+ *
  * Logger helper
  *
  * This is a logger helper, it will allow entry-exit analysis to be much easier.
@@ -388,7 +388,6 @@ public final class OldLogUtils {
 		private final int fId;
 		private final String fCategory;
 		private final Map<String, Object> fData = new HashMap<>();
-		private final String fLabel;
 		private final long fTime;
 
 		/**
@@ -411,7 +410,6 @@ public final class OldLogUtils {
 			fLogger = log;
 			fLevel = level;
 			fCategory = category;
-			fLabel = label;
 			fThreadId = Thread.currentThread().getId();
 			char phaseB = 'B';
 			Supplier<String> msgSupplier = () -> {
