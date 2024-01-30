@@ -70,6 +70,10 @@ public class SnapshotHandler extends FileHandler {
 
     private Deque<InnerEvent> fData = new ArrayDeque<>();
     private Map<String, Map<String, List<InnerEvent>>> fStacks = new HashMap<>();
+    /**
+     * Drain the trace asynchronously (false for testing)
+     */
+    protected volatile boolean fAsynchronousDrain = true;
 
     /**
      * Snapshot handler constructor
@@ -138,11 +142,9 @@ public class SnapshotHandler extends FileHandler {
 
     @Override
     public boolean isLoggable(LogRecord logRecord) {
+        // feature switch here
         return (fIsEnabled && logRecord != null && super.isLoggable(logRecord)
                 && (logRecord.getLevel().intValue() <= Level.FINE.intValue()) && (logRecord instanceof TraceEventLogRecord)); // add
-        // feature
-        // switch
-        // here
     }
 
     private boolean addToSnapshot(LogRecord message) {
@@ -167,11 +169,14 @@ public class SnapshotHandler extends FileHandler {
         {
             InnerEvent lastEvent = stack.remove(stack.size() - 1);
             if (stack.isEmpty()) {
-                double delta = (event.getTs() - lastEvent.getTs()) * 0.000001; // convert
-                                                                               // to
-                                                                               // seconds
+                // convert to seconds
+                double delta = (event.getTs() - lastEvent.getTs()) * 0.000001;
                 if (delta > fTimeout) {
-                    drain(fData);
+                    if(fAsynchronousDrain) {
+                        drain(fData);
+                    } else {
+                        drainTrace(fData).run();
+                    }
                 }
             }
             break;
@@ -191,7 +196,13 @@ public class SnapshotHandler extends FileHandler {
     }
 
     private void drain(Deque<InnerEvent> data) {
-        Thread thread = new Thread(() -> {
+        Thread thread = new Thread(drainTrace(data));
+        thread.setName("Trace Drainer"); //$NON-NLS-1$
+        thread.start();
+    }
+
+    private Runnable drainTrace(Deque<InnerEvent> data) {
+        return () -> {
             Path path = new File(fFilePath + Long.toString((long) data.getFirst().getTs()) + ".json").toPath(); //$NON-NLS-1$
             try (BufferedWriter fw = Files.newBufferedWriter(path, Charset.defaultCharset())) {
                 fw.write('[');
@@ -210,9 +221,7 @@ public class SnapshotHandler extends FileHandler {
             } catch (IOException e) {
                 // we tried!
             }
-        });
-        thread.setName("Trace Drainer"); //$NON-NLS-1$
-        thread.start();
+        };
     }
 
     /**
