@@ -71,6 +71,7 @@ public class SnapshotTest {
      */
     @Before
     public void before() throws SecurityException, IOException {
+        LogManager.getLogManager().reset();
         fLogger = Logger.getAnonymousLogger();
         fStreamHandler = new SnapshotHandler(0.5);
         for (Handler handler : fLogger.getHandlers()) {
@@ -108,16 +109,45 @@ public class SnapshotTest {
     }
 
     /**
-     * Test an actual snapshot. Can timeout if it doesn't write in 10s.
+     * Test an actual snapshot.
      *
-     * @throws InterruptedException
-     *             won't happen
      * @throws IOException
      *             won't happen
      */
     @Test
-    public void slowTest() throws InterruptedException, IOException {
+    public void slowTest() throws IOException {
         Logger logger = this.fLogger;
+        fStreamHandler.fAsynchronousDrain = false;
+        assertNotNull(logger);
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"a\"", 10000000000L, 'a', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"b\"", 20000000000L, 'B', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"c\"", 30000000000L, 'c', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"d\"", 40000000000L, 'd', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"e\"", 50000000000L, 'e', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"f\"", 60000000000L, 'f', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"g\"", 70000000000L, 'E', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
+        File input = new File("request-10000000.json"); //$NON-NLS-1$
+        assertTrue(input.exists());
+        assertEquals(35, input.length());
+        try (FileReader fr = new FileReader(input)) {
+            char[] data = new char[(int) input.length()];
+            fr.read(data);
+            assertEquals("[\"a\",\n" + "\"b\",\n" + "\"c\",\n" + "\"d\",\n" + "\"e\",\n" + "\"f\",\n" + "\"g\"]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+                    String.valueOf(data));
+        }
+        input.deleteOnExit();
+    }
+
+    /**
+     * Test an actual snapshot. Can timeout if it doesn't write in 10s.
+     *
+     * @throws InterruptedException
+     *             won't happen
+     */
+    @Test
+    public void slowTestAsync() throws InterruptedException {
+        Logger logger = this.fLogger;
+        fStreamHandler.fAsynchronousDrain = true;
         assertNotNull(logger);
         logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"a\"", 10000000000L, 'a', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
         logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"b\"", 20000000000L, 'B', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -130,13 +160,7 @@ public class SnapshotTest {
             fStreamHandler.flush();
             Thread.sleep(100);
             File input = new File("request-10000000.json"); //$NON-NLS-1$
-            if (input.exists() && input.length() == 35) {
-                try (FileReader fr = new FileReader(input)) {
-                    char[] data = new char[(int) input.length()];
-                    fr.read(data);
-                    assertEquals("[\"a\",\n" + "\"b\",\n" + "\"c\",\n" + "\"d\",\n" + "\"e\",\n" + "\"f\",\n" + "\"g\"]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-                            String.valueOf(data));
-                }
+            if (input.exists()) {
                 input.deleteOnExit();
                 return;
 
