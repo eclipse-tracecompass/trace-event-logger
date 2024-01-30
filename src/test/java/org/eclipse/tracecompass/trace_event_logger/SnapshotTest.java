@@ -108,7 +108,7 @@ public class SnapshotTest {
     }
 
     /**
-     * Test an actual snapshot
+     * Test an actual snapshot. Can timeout if it doesn't write in 10s.
      *
      * @throws InterruptedException
      *             won't happen
@@ -126,15 +126,23 @@ public class SnapshotTest {
         logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"e\"", 50000000000L, 'e', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
         logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"f\"", 60000000000L, 'f', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
         logger.log(new LogUtils.TraceEventLogRecord(Level.INFO, () -> "\"g\"", 70000000000L, 'E', "Bla")); //$NON-NLS-1$ //$NON-NLS-2$
-        Thread.sleep(1000);
-        fStreamHandler.flush();
-        File input = new File("request-10000000.json"); //$NON-NLS-1$
-        try (FileReader fr = new FileReader(input)) {
-            char[] data = new char[(int) input.length()];
-            fr.read(data);
-            assertEquals("[\"a\",\n" + "\"b\",\n" + "\"c\",\n" + "\"d\",\n" + "\"e\",\n" + "\"f\",\n" + "\"g\"]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-                    String.valueOf(data));
+        for (int i = 0; i < 100; i++) {
+            fStreamHandler.flush();
+            Thread.sleep(100);
+            File input = new File("request-10000000.json"); //$NON-NLS-1$
+            if (input.exists() && input.length() == 35) {
+                try (FileReader fr = new FileReader(input)) {
+                    char[] data = new char[(int) input.length()];
+                    fr.read(data);
+                    assertEquals("[\"a\",\n" + "\"b\",\n" + "\"c\",\n" + "\"d\",\n" + "\"e\",\n" + "\"f\",\n" + "\"g\"]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+                            String.valueOf(data));
+                }
+                input.deleteOnExit();
+                return;
+
+            }
         }
+        fail("Timeout!"); //$NON-NLS-1$
     }
 
     /**
