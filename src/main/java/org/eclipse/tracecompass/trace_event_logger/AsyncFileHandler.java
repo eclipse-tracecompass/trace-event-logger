@@ -176,8 +176,8 @@ public class AsyncFileHandler extends StreamHandler {
      *             if there are IO problems opening the files.
      */
     public AsyncFileHandler() throws SecurityException, IOException {
-        this(""); // let's hope it's configured in logging //$NON-NLS-1$
-                  // properties.
+        this(null); // let's hope it's configured in logging //$NON-NLS-1$
+                    // properties.
     }
 
     /**
@@ -193,7 +193,7 @@ public class AsyncFileHandler extends StreamHandler {
      */
     public AsyncFileHandler(String pattern) throws SecurityException, IOException {
         configure();
-        fFileHandler = new FileHandler(pattern);
+        fFileHandler = pattern == null ? new FileHandler() : new FileHandler(pattern);
         if (fEncoding != null) {
             fFileHandler.setEncoding(fEncoding);
         }
