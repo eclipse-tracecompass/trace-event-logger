@@ -85,20 +85,27 @@ public class AsyncFileHandlerTest {
 
     /**
      * Test Bad configuration
+     *
+     * @throws IOException
+     *             The desired exception
+     * @throws SecurityException
+     *             won't happen
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void testBadConfigure() {
+    @Test(expected = IOException.class)
+    public void testBadConfigure() throws SecurityException, IOException {
         try (InputStream fis = new FileInputStream(
                 new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/badlogging.properties"))) { //$NON-NLS-1$
-            LogManager manager = LogManager.getLogManager();
-            manager.readConfiguration(fis);
-            String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
-            assertNotNull(prop);
+            try {
+                LogManager manager = LogManager.getLogManager();
+                manager.readConfiguration(fis);
+                String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
+                assertNotNull(prop);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
             new AsyncFileHandler();
             fail("should have failed above"); //$NON-NLS-1$
         } catch (FileNotFoundException e) {
-            fail(e.getMessage());
-        } catch (IOException e) {
             fail(e.getMessage());
         }
     }
