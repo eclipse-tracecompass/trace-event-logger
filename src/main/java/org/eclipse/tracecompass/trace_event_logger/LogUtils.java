@@ -139,8 +139,8 @@ public final class LogUtils {
      */
     public static class TraceEventLogRecord extends LogRecord {
         private static final long serialVersionUID = 8970603767997599454L;
-        private transient final Supplier<String> supplier;
-        private String message = null;
+        private transient final Supplier<String> fSupplier;
+        private String fMessage = null;
 
         /**
          * Construtor
@@ -155,17 +155,17 @@ public final class LogUtils {
          */
         public TraceEventLogRecord(Level level, Supplier<String> supplier, Object... parameters) {
             super(level, ""); //$NON-NLS-1$
-            this.supplier = supplier;
+            this.fSupplier = supplier;
             setParameters(parameters);
         }
 
         @Override
         public String getMessage() {
             synchronized (this) {
-                String msg = message;
+                String msg = fMessage;
                 if (msg == null) {
-                    msg = Objects.requireNonNull(supplier.get());
-                    message = msg;
+                    msg = Objects.requireNonNull(fSupplier.get());
+                    fMessage = msg;
                 }
                 return msg;
             }
@@ -476,7 +476,7 @@ public final class LogUtils {
                 StringBuilder sb = new StringBuilder();
                 sb.append('{');
                 appendCommon(sb, phaseB, fTime, fThreadId);
-                appendName(sb, label);
+                appendName(sb, fLabel);
                 appendArgs(sb, args);
                 sb.append('}');
                 return sb.toString();
@@ -930,7 +930,7 @@ public final class LogUtils {
         }
         return sb;
     }
-    
+
 	private static void validateArgs(Object[] data) {
 		if (data.length == 1) {
 			return;

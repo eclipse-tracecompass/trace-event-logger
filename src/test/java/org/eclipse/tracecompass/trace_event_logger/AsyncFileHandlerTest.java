@@ -39,113 +39,106 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test aynchronous file hnandler
+ */
 public class AsyncFileHandlerTest {
 
-	private Logger logger;
+    /**
+     * Test with simple configuration
+     */
+    @Test
+    public void testConfigure() {
+        try (InputStream fis = new FileInputStream(
+                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/logging.properties"))) { //$NON-NLS-1$
+            LogManager manager = LogManager.getLogManager();
+            manager.readConfiguration(fis);
+            Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+            first.close();
+        } catch (FileNotFoundException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
 
-	@Before
-	public void before() {
-		this.logger = Logger.getAnonymousLogger();
-	}
+    /**
+     * Test with good configuration
+     */
+    @Test
+    public void testGoodConfigure() {
+        try (InputStream fis = new FileInputStream(
+                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/goodlogging.properties"))) { //$NON-NLS-1$
+            LogManager manager = LogManager.getLogManager();
+            manager.readConfiguration(fis);
+            Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+            first.close();
+        } catch (FileNotFoundException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
 
-	/**
-	 * Test with simple configuration
-	 */
-	@Test
-	public void testConfigure() {
-		Logger logger = this.logger;
-		try (InputStream fis = new FileInputStream(
-				new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/logging.properties"))) {
-			LogManager manager = LogManager.getLogManager();
-			manager.readConfiguration(fis);
-			Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath());
-			first.close();
-		} catch (FileNotFoundException e) {
-			fail(e.getMessage());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Test with good configuration
-	 */
-	@Test
-	public void testGoodConfigure() {
-		Logger logger = this.logger;
-		try (InputStream fis = new FileInputStream(
-				new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/goodlogging.properties"))) {
-			LogManager manager = LogManager.getLogManager();
-			manager.readConfiguration(fis);
-			Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath());
-			first.close();
-		} catch (FileNotFoundException e) {
-			fail(e.getMessage());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
+    /**
+     * Test Bad configuration
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadConfigure() {
+        try (InputStream fis = new FileInputStream(
+                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/badlogging.properties"))) { //$NON-NLS-1$
+            LogManager manager = LogManager.getLogManager();
+            manager.readConfiguration(fis);
+            String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
+            assertNotNull(prop);
+            new AsyncFileHandler();
+            fail("should have failed above"); //$NON-NLS-1$
+        } catch (FileNotFoundException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
 
-	/**
-	 * Test Bad configuration
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void testBadConfigure() {
-		Logger logger = this.logger;
-		try (InputStream fis = new FileInputStream(
-				new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/badlogging.properties"))) {
-			LogManager manager = LogManager.getLogManager();
-			manager.readConfiguration(fis);
-			String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents");
-			assertNotNull(prop);
-			Handler other = new AsyncFileHandler();
-			fail("should have failed above");
-		} catch (FileNotFoundException e) {
-			fail(e.getMessage());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	/**
-	 * Test the getters and setters. They pass everything to the filehandler.
-	 * 
-	 * @throws SecurityException
-	 * @throws IOException
-	 */
-	@Test
-	public void testGetterSetters() throws SecurityException, IOException {
-		File test = File.createTempFile("test", ".json");
-		AsyncFileHandler toTest = new AsyncFileHandler(test.getAbsolutePath());
-		toTest.setEncoding("UTF-8");
-		assertEquals("UTF-8", toTest.getEncoding());
-		Filter f = new Filter() {
-			@Override
-			public boolean isLoggable(LogRecord record) {
-				return false;
-			}
-		};
-		toTest.setFilter(f);
-		assertEquals(f, toTest.getFilter());
-		toTest.setLevel(Level.CONFIG);
-		assertEquals(Level.CONFIG, toTest.getLevel());
-		ErrorManager em = new ErrorManager();
-		toTest.setErrorManager(em);
-		assertEquals(em, toTest.getErrorManager());
-		Formatter fmt = new Formatter() {
-			@Override
-			public String format(LogRecord record) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
-		toTest.setFormatter(fmt);
-		assertEquals(fmt, toTest.getFormatter());
-	}
+    /**
+     * Test the getters and setters. They pass everything to the filehandler.
+     *
+     * @throws SecurityException
+     *             should not happen
+     * @throws IOException
+     *             should not happen
+     */
+    @Test
+    public void testGetterSetters() throws SecurityException, IOException {
+        File test = File.createTempFile("test", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        AsyncFileHandler toTest = new AsyncFileHandler(test.getAbsolutePath());
+        toTest.setEncoding("UTF-8"); //$NON-NLS-1$
+        assertEquals("UTF-8", toTest.getEncoding()); //$NON-NLS-1$
+        Filter f = new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return false;
+            }
+        };
+        toTest.setFilter(f);
+        assertEquals(f, toTest.getFilter());
+        toTest.setLevel(Level.CONFIG);
+        assertEquals(Level.CONFIG, toTest.getLevel());
+        ErrorManager em = new ErrorManager();
+        toTest.setErrorManager(em);
+        assertEquals(em, toTest.getErrorManager());
+        Formatter fmt = new Formatter() {
+            @Override
+            public String format(LogRecord record) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        toTest.setFormatter(fmt);
+        assertEquals(fmt, toTest.getFormatter());
+    }
 
 }
