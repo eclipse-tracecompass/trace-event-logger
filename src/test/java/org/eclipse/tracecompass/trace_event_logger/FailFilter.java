@@ -27,15 +27,21 @@ package org.eclipse.tracecompass.trace_event_logger;
 import java.util.logging.Filter;
 import java.util.logging.LogRecord;
 
+/***
+ * Fail filter for testing
+ */
 public class FailFilter implements Filter {
 
-	public FailFilter() {
-		// do nothing
-	}
-	
-	@Override
-	public boolean isLoggable(LogRecord record) {
-		return false;
-	}
+    /**
+     * Default constructor
+     */
+    public FailFilter() {
+        // do nothing
+    }
+
+    @Override
+    public boolean isLoggable(LogRecord record) {
+        return false;
+    }
 
 }
