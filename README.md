@@ -99,7 +99,7 @@ will generate the following trace
 
 ```json
 {"ts":12345,"ph":"B","tid":1,"name":"Perform Query"}
-{"ts":"12366,"ph":"E","tid":1}
+{"ts":12366,"ph":"E","tid":1}
 ```
 See more examples in javadoc.
 
