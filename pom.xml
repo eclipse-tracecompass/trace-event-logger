@@ -7,10 +7,10 @@
   <groupId>org.eclipse.tracecompass</groupId>
   <artifactId>trace-event-logger</artifactId>
   <version>0.0.3-SNAPSHOT</version>
-
+  <packaging>jar</packaging>
   <name>trace-event-logger</name>
   <!-- the project's website -->
-  <url>http://www.tracecompass.org</url>
+  <url>https://eclipse.dev/tracecompass</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,4 +72,13 @@
       </plugins>
     </pluginManagement>
   </build>
+  <description>This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.</description>
+  <scm>
+    <url>https://github.com/eclipse-tracecompass/trace-event-logger</url>
+    <connection>git@github.com:eclipse-tracecompass/trace-event-logger.git</connection>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/eclipse-tracecompass/trace-event-logger/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
 </project>
