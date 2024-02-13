@@ -102,8 +102,7 @@ import java.util.logging.Logger;
  * {@link #traceObjectDestruction(Logger, Level, Object)}
  *
  * The design philosophy of this class is very heavily inspired by the trace
- * event format of Google. The full specification is available <a
- * href=https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#>here</a>.
+ * event format of Google. The full specification is available @see <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#">here</a>.
  * <p>
  *
  * The main goals are clarity of output and simplicity for the developer.
@@ -111,9 +110,11 @@ import java.util.logging.Logger;
  * minor performance impact compared to simply logging the events is to be
  * expected.
  *
+ * <strong>This class is not intended to be instantiated by clients. It
+ *                is a helper class.</strong>
+ 
  * @author Matthew Khouzam
- * @noinstantiate This class is not intended to be instantiated by clients. It
- *                is a helper class.
+ * 
  */
 public final class LogUtils {
 
@@ -140,6 +141,7 @@ public final class LogUtils {
     public static class TraceEventLogRecord extends LogRecord {
         private static final long serialVersionUID = 8970603767997599454L;
         private transient final Supplier<String> fSupplier;
+        /** message cache, lazy inited */
         private String fMessage = null;
 
         /**
