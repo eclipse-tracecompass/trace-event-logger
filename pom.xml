@@ -79,6 +79,57 @@
             </plugins>
         </build>
     </profile>
+    <profile>
+      <id>deploy</id>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
+              </plugin>
+          </plugins>
+      </build>
+    </profile>
+    <profile>
+        <id>production</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.cyclonedx</groupId>
+                    <artifactId>cyclonedx-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>copy-meta-inf-resources</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>${project.build.directory}/sbom/</directory>
+                                        <includes>
+                                            <include>*.json</include>
+                                            <include>*.xml</include>
+                                        </includes>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
   </profiles>
   <build>
     <resources>
