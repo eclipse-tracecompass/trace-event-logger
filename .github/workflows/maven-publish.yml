@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,23 +37,23 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.ORG_OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.ORG_OSSRH_PASSWORD }}
           PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
-    - uses: actions/checkout@v4
-    - name: Set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: 'maven'
-        server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_PASSWORD
-        gpg-passphrase: PASSPHRASE
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          settings-path: ${{ github.workspace }} # location for the settings.xml file
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-passphrase: PASSPHRASE
 
-    - name: Publish to Maven Central Repository
-      run: mvn --batch-mode deploy -s $GITHUB_WORKSPACE/settings.xml
-      env:
-        MAVEN_USERNAME: ${{ secrets.ORG_OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.ORG_OSSRH_PASSWORD }}
-        PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
+      - name: Publish to Maven Central Repository
+        run: mvn --batch-mode deploy -s $GITHUB_WORKSPACE/settings.xml
+        env:
+          MAVEN_USERNAME: ${{ secrets.ORG_OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.ORG_OSSRH_PASSWORD }}
+          PASSPHRASE: ${{ secrets.ORG_GPG_PASSPHRASE }}
 
