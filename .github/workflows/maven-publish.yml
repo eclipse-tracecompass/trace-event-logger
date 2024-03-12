@@ -44,14 +44,13 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
-          settings-path: ${{ github.workspace }} # location for the settings.xml file
+          server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
           gpg-passphrase: PASSPHRASE
 
       - name: Publish to Maven Central Repository
-        run: mvn --batch-mode deploy -s $GITHUB_WORKSPACE/settings.xml
+        run: mvn -Pdeploy -Pproduction --batch-mode deploy
         env:
           MAVEN_USERNAME: ${{ secrets.ORG_OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.ORG_OSSRH_PASSWORD }}
