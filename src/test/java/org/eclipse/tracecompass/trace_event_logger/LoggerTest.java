@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -106,6 +107,7 @@ public class LoggerTest {
      */
     @Before
     public void before() {
+        LogManager.getLogManager().reset();
         fLogger = Logger.getAnonymousLogger();
         fLog = new StringOutputStream();
         fStreamHandler = new StreamHandler(fLog, new SimpleFormatter());
