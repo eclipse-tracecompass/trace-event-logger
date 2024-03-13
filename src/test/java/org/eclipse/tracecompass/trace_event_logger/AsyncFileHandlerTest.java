@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -40,12 +41,21 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
+import org.junit.After;
 import org.junit.Test;
 
 /**
- * Test aynchronous file hnandler
+ * Test aynchronous file handler
  */
 public class AsyncFileHandlerTest {
+
+    /**
+     * Clean up
+     */
+    @After
+    public void after() {
+        LogManager.getLogManager().reset();
+    }
 
     /**
      * Test with simple configuration
@@ -91,19 +101,25 @@ public class AsyncFileHandlerTest {
      * @throws SecurityException
      *             won't happen
      */
-    @Test(expected = IOException.class)
+    @Test
     public void testBadConfigure() throws SecurityException, IOException {
         try (InputStream fis = new FileInputStream(
                 new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/badlogging.properties"))) { //$NON-NLS-1$
+            LogManager manager = LogManager.getLogManager();
             try {
-                LogManager manager = LogManager.getLogManager();
                 manager.readConfiguration(fis);
                 String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
                 assertNotNull(prop);
             } catch (IOException e) {
                 fail(e.getMessage());
             }
-            new AsyncFileHandler();
+            try {
+                new AsyncFileHandler();
+            } catch (UnsupportedEncodingException e) {
+                assertNotNull(e);
+                assertEquals("uTF-6", e.getMessage()); //$NON-NLS-1$
+                return;
+            }
             fail("should have failed above"); //$NON-NLS-1$
         } catch (FileNotFoundException e) {
             fail(e.getMessage());
