@@ -3,21 +3,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
+  <licenses>
+    <license>
+       <name>MIT License</name>
+       <url>https://opensource.org/license/MIT</url>
+    </license>
+  </licenses>
+  <organization>
+    <name>Eclipse Foundation</name>
+    <url>https://www.eclipse.org/</url>
+  </organization>
+  <issueManagement>
+    <url>https://github.com/eclipse-tracecompass/trace-event-logger/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <scm>
+    <url>https://github.com/eclipse-tracecompass/trace-event-logger</url>
+    <connection>git@github.com:eclipse-tracecompass/trace-event-logger.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <name>Eclipse Trace Compass Community</name>
+      <organization>Eclipse Trace Compass Project</organization>
+      <organizationUrl>https://projects.eclipse.org/projects/tools.tracecompass</organizationUrl>
+      <email>tracecompass-dev@eclipse.org</email>
+    </developer>
+  </developers>
   <groupId>org.eclipse.tracecompass</groupId>
   <artifactId>trace-event-logger</artifactId>
   <version>0.0.4</version>
   <packaging>jar</packaging>
   <name>trace-event-logger</name>
+  <description>This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.</description>
   <!-- the project's website -->
   <url>https://eclipse.dev/tracecompass</url>
 
+
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <license.licenseName>MIT</license.licenseName>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -153,32 +181,36 @@
         <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.2</version>
+          <version>3.3.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.13.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
+          <version>3.0.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.0.2</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>3.1.1</version>
         </plugin>
         <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.7.1</version>
+          <version>3.12.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.6.3</version>
         </plugin>
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -187,13 +219,4 @@
       </plugins>
     </pluginManagement>
   </build>
-  <description>This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.</description>
-  <scm>
-    <url>https://github.com/eclipse-tracecompass/trace-event-logger</url>
-    <connection>git@github.com:eclipse-tracecompass/trace-event-logger.git</connection>
-  </scm>
-  <issueManagement>
-    <url>https://github.com/eclipse-tracecompass/trace-event-logger/issues</url>
-    <system>GitHub Issues</system>
-  </issueManagement>
 </project>
