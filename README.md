@@ -2,7 +2,7 @@
 
 This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.
 
-A Snapshot taker is provided in order to write slow transactions onto disk.
+A snapshot taker is provided in order to write slow transactions onto disk.
 
 An asynchronous writer is available for putting the IO bottleneck on another thread. It is typically much faster than the FileHandler from JUL.
 
@@ -120,3 +120,32 @@ The design philosophy of this class is heavily inspired by the trace event forma
 
 The main goals of this logger helper are clarity of output and simplicity for the developer. While performance is a nice-to-have, it is not the main concern of this helper. A minor performance impact compared to simply logging the events is to be expected.
 
+## Running
+
+The jar needs to be loaded for it to run. Assuming the jar is called `trace-event-logger-x.y.z.jar`, one would need to first build their java application with the jar in the *classpath* such as 
+
+```console
+user@host:~$ javac -cp trace-event-logger-x.y.z.jar my-project
+```
+	
+`-cp`: loads the jar
+
+and then, run it as 
+
+```console
+user@host:~$ java -Djava.util.logging.config.file=path/to/logging.properties -p bin:path/to/trace-event-logger-x.y.z.jar -m package/path/to.Main
+```
+
+`-Djava.util.logging.config.file`: the path of the `logging.properties`
+
+`-p`: the packages, the location of the classes and the external logging jar
+
+`-m`: the location of the main module to run.
+
+## Handlers
+
+There are two new `handler`s introduced.
+
+* The AsyncFileHandler: `org.eclipse.tracecompass.trace_event_logger.AsyncFileHandler` in the logging properties. It handles serialization and writing to disk in a separate thread from the caller. Note: this will require explicitly killing a process when it exits as it is a separate thread.
+
+* The SnapshotHandler: `org.eclipse.tracecompass.trace_event_logger.SnapshotHandler` in the logging properties. It writes all events to a fixed length queue (culling at the front when full) and dumps the entire queue to disk when a defined latency is hit, for example when a span lasts over 30 seconds.
