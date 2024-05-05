@@ -50,6 +50,8 @@ To use free form tracing, check traceInstant.
 To instrument
 
 ```java
+import java.io.FileWriter;
+
 public class SlappyWag {
     public static void main(String[] args) {
         System.out.println("The program will write hello 10x between two scope logs\n");
@@ -65,11 +67,19 @@ public class SlappyWag {
 one needs to add to the try-with-resources block a scopewriter
 
 ```java
+import java.io.FileWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.tracecompass.trace_event_logger.LogUtils;
+
 public class SlappyWag {
     
-    Logger logger = Logger.getAnonymousLogger();
+    private static Logger logger = Logger.getAnonymousLogger();
     
     public static void main(String[] args) {
+        // Set the logger level based on your requirements
+        // logger.setLevel(Level.FINE);
+
         System.out.println("The program will write hello 10x between two scope logs\n");
         try (LogUtils.ScopeLog sl = new LogUtils.ScopeLog(logger, Level.FINE, "writing to file"); FileWriter fw = new FileWriter("test.txt")) {
             for (int i = 0; i < 10; i++) {
@@ -89,7 +99,7 @@ Will generate the following trace
 example 2:
 
 ```java
-try (ScopeLog linksLogger = new ScopeLog(LOGGER, Level.CONFIG, "Perform Query")) { //$NON-NLS-1$
+try (LogUtils.ScopeLog linksLogger = new LogUtils.ScopeLog(logger, Level.CONFIG, "Perform Query")) { //$NON-NLS-1$
   ss.updateAllReferences();
   dataStore.addAll(ss.query(ts, trace));
 }
@@ -103,9 +113,35 @@ will generate the following trace
 ```
 See more examples in javadoc.
 
+**P.S.: You may need to terminate the logger thread at the end of your program since the library cannot terminate it automatically.**
+```Java
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+public class SlappyWag {
+
+  private static Logger logger = Logger.getAnonymousLogger();
+
+  public static void main (String[] args) {
+    // Your code
+    // ...
+    
+    LogManager.getLogManager().reset();
+
+    // End of your program
+  }
+
+}
+```
+
 ## Viewing results
 
 While one could open the traces in their favorite text editor, results are better with a GUI. One could open the resulting json files in either `chrome://tracing` or [Eclipse Trace Compass](https://eclipse.dev/tracecompass/). You will need to install trace event parser support by clicking on the `Tools->Add-ons...` menu and selecting **Trace Compass TraceEvent Parser** in trace compass to load the JSON files. If the trace is malformed due to a handler not being configured properly, the program `jsonify.py` supplied in the root of the project can help restore it. 
+
+```console
+// python 3 jsonify.py -input -output
+python3 jsonify.py LOG_FILE log.json
+```
 
 [Video tutorial](https://www.youtube.com/watch?v=YCdzmcpOrK4)
 
