@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -194,7 +194,7 @@ public final class OldLogUtils {
             fTime = System.nanoTime();
             fLogger = log;
             fLevel = level;
-            fThreadId = Thread.currentThread().getId();
+            fThreadId = Thread.currentThread().threadId();
             fLabel = label;
             char phase = 'B';
             Supplier<String> msgSupplier = () -> {
@@ -435,7 +435,7 @@ public final class OldLogUtils {
             fLogger = log;
             fLevel = level;
             fCategory = category;
-            fThreadId = Thread.currentThread().getId();
+            fThreadId = Thread.currentThread().threadId();
             char phaseB = 'B';
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
@@ -552,7 +552,7 @@ public final class OldLogUtils {
      */
     public static int traceObjectCreation(Logger logger, Level level, Object item) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         int identityHashCode = System.identityHashCode(item);
         char phase = 'N';
         Supplier<String> msgSupplier = () -> {
@@ -583,7 +583,7 @@ public final class OldLogUtils {
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -613,7 +613,7 @@ public final class OldLogUtils {
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item, int uniqueId) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -647,7 +647,7 @@ public final class OldLogUtils {
     public static void traceAsyncStart(Logger logger, Level level, String name, String category, int id,
             Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'b';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -682,7 +682,7 @@ public final class OldLogUtils {
     public static void traceAsyncNested(Logger logger, Level level, String name, String category, int id,
             Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'n';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -716,7 +716,7 @@ public final class OldLogUtils {
      */
     public static void traceAsyncEnd(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'e';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -749,7 +749,7 @@ public final class OldLogUtils {
      */
     public static void traceInstant(Logger logger, Level level, String name, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'i';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -776,7 +776,7 @@ public final class OldLogUtils {
      */
     public static void traceCounter(Logger logger, Level level, String name, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'C';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -807,7 +807,7 @@ public final class OldLogUtils {
      */
     public static void traceMarker(Logger logger, Level level, String name, long duration, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'R';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
