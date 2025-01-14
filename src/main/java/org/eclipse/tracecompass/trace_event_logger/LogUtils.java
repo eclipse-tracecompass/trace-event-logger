@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -112,9 +112,9 @@ import java.util.logging.Logger;
  *
  * <strong>This class is not intended to be instantiated by clients. It
  *                is a helper class.</strong>
- 
+
  * @author Matthew Khouzam
- * 
+ *
  */
 public final class LogUtils {
 
@@ -231,7 +231,7 @@ public final class LogUtils {
             fTime = System.nanoTime();
             fLogger = log;
             fLevel = level;
-            fThreadId = Thread.currentThread().getId();
+            fThreadId = Thread.currentThread().threadId();
             fLabel = label;
             char phase = 'B';
             validateArgs(args);
@@ -471,7 +471,7 @@ public final class LogUtils {
             fLevel = level;
             fCategory = category;
             fLabel = label;
-            fThreadId = Thread.currentThread().getId();
+            fThreadId = Thread.currentThread().threadId();
             char phaseB = 'B';
             validateArgs(args);
             Supplier<String> msgSupplier = () -> {
@@ -590,7 +590,7 @@ public final class LogUtils {
      */
     public static int traceObjectCreation(Logger logger, Level level, Object item) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         int identityHashCode = System.identityHashCode(item);
         char phase = 'N';
         Supplier<String> msgSupplier = () -> {
@@ -621,7 +621,7 @@ public final class LogUtils {
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -651,7 +651,7 @@ public final class LogUtils {
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item, int uniqueId) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
@@ -684,7 +684,7 @@ public final class LogUtils {
      */
     public static void traceAsyncStart(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'b';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
@@ -719,7 +719,7 @@ public final class LogUtils {
      */
     public static void traceAsyncNested(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'n';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
@@ -754,7 +754,7 @@ public final class LogUtils {
      */
     public static void traceAsyncEnd(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'e';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
@@ -788,7 +788,7 @@ public final class LogUtils {
      */
     public static void traceInstant(Logger logger, Level level, String name, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'i';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
@@ -816,7 +816,7 @@ public final class LogUtils {
      */
     public static void traceCounter(Logger logger, Level level, String name, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'C';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
@@ -848,7 +848,7 @@ public final class LogUtils {
      */
     public static void traceMarker(Logger logger, Level level, String name, long duration, Object... args) {
         long time = System.nanoTime();
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         char phase = 'R';
         validateArgs(args);
         Supplier<String> msgSupplier = () -> {
