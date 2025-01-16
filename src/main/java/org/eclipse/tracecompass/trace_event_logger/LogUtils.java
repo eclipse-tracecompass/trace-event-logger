@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -112,9 +112,9 @@ import java.util.logging.Logger;
  *
  * <strong>This class is not intended to be instantiated by clients. It
  *                is a helper class.</strong>
- 
+
  * @author Matthew Khouzam
- * 
+ *
  */
 public final class LogUtils {
 
@@ -187,21 +187,19 @@ public final class LogUtils {
      *
      * Usage:
      *
-     * <pre>
-     * {@code usage of ScopeLog}
+     * <pre>{@code usage of ScopeLog
      *  try (ScopeLog linksLogger = new ScopeLog(LOGGER, Level.CONFIG, "Perform Query")) { //$NON-NLS-1$
      *      ss.updateAllReferences();
      *      dataStore.addAll(ss.query(ts, trace));
      *  }
-     * </pre>
+     * }</pre>
      * <p>
      * will generate the following trace
      *
-     * <pre>
-     * {@code trace output}
+     * <pre>{@code trace output
      *  INFO: {"ts":12345,"ph":"B",tid:1,"name:Perform Query"}
      *  INFO: {"ts":"12366,"ph":"E","tid":1}
-     * </pre>
+     * }</pre>
      */
     public static class ScopeLog implements AutoCloseable {
 
@@ -410,28 +408,27 @@ public final class LogUtils {
      * can be used in scatter-gather/map-reduce operations as well as threads
      * that trigger a UI Thread operation.
      *
-     * <pre>
-     * {@code usage of FlowScopeLog}
+     * <pre>{@code usage of FlowScopeLog
      *  try (FlowScopeLog linksLogger = new FlowScopeLog(LOGGER, Level.CONFIG, "Perform Query", "category", 0x100)) { //$NON-NLS-1$
      *      Display.asynchExec(()->{
-     *      try(FlowScopeLog linksLogger2 = new FlowScopeLog(LOGGER, Level.CONFIG, "Update UI", "category", linksLogger.getId()) {
-     *          linksLogger.step("updating ui");
-     *      };
+     *          try(FlowScopeLog linksLogger2 = new FlowScopeLog(LOGGER, Level.CONFIG, "Update UI", "category", linksLogger.getId()) {
+     *              linksLogger.step("updating ui");
+     *          };
+     *      }
      *      linksLogger.step("forked thread");
      *  }
-     * </pre>
+     * }</pre>
      * <p>
      * will generate the following trace (order not guaranteed)
      *
-     * <pre>
-     * {@code trace output}
+     * <pre>{@code trace output
      *  INFO: {"ts":12345,"ph":"s",tid:1,"name":"Perform Query", "cat":"category", "id":256}
      *  INFO: {"ts":12346","ph":"t",tid:1,"name":"forked thread","cat":"category", "id":256}
      *  INFO: {"ts":"12366,"ph":"f","tid":1,"cat":"category", "id":256}
      *  INFO: {"ts":12400,"ph":"s",tid:0,"name":"Update UI","cat":"category", "id":256}
      *  INFO: {"ts":12416","ph":"t",tid:0,"name":"updating ui", "cat":"category", "id":256}
      *  INFO: {"ts":"12420,"ph":"f","tid":0,"cat":"category", "id":256}
-     * </pre>
+     * }</pre>
      */
     public static class FlowScopeLog implements AutoCloseable {
 
