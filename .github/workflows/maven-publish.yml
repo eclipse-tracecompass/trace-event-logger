@@ -48,7 +48,7 @@ jobs:
           gpg-passphrase: PASSPHRASE
 
       - name: Publish to Maven Central Repository
-        run: mvn -Pdeploy -Pproduction --batch-mode deploy
+        run: mvn -Prelease-sign-artifacts -Pdeploy -Pproduction --batch-mode deploy
         env:
           MAVEN_USERNAME: ${{ secrets.ORG_OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.ORG_OSSRH_PASSWORD }}
