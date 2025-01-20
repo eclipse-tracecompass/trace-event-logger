@@ -118,6 +118,28 @@ import java.util.logging.Logger;
  */
 public final class LogUtils {
 
+    /**
+     * Interface for flow scope logger
+     */
+    public interface IFlowScopeLog {
+
+        /**
+         * Get the category for this scope. The category can be injected to
+         * other components that can use it for the scope loggers
+         *
+         * @return The category of this scope
+         */
+        String getCategory();
+
+        /**
+         * Get the ID for this scope. The ID can be injected to other components
+         * that can use it for the scope loggers
+         *
+         * @return The ID of this scope
+         */
+        int getId();
+    }
+
     private static final Format FORMAT = new DecimalFormat("#.###"); //$NON-NLS-1$
 
     /*
@@ -292,7 +314,7 @@ public final class LogUtils {
         private final Object[] fArgs;
         private int fId = Integer.MIN_VALUE;
         private String fCategory = null;
-        private FlowScopeLog fParent = null;
+        private IFlowScopeLog fParent = null;
         private boolean fHasParent = false;
 
         /**
@@ -321,7 +343,7 @@ public final class LogUtils {
          * will be automatically generated.
          *
          * This method is mutually exclusive with
-         * {@link #setParentScope(FlowScopeLog)}. Calling both will throw an
+         * {@link #setParentScope(IFlowScopeLog)}. Calling both will throw an
          * exception.
          *
          * @param category
@@ -340,7 +362,7 @@ public final class LogUtils {
          * Set a category and ID for the flow scope.
          *
          * This method is mutually exclusive with
-         * {@link #setParentScope(FlowScopeLog)}. Calling both will throw an
+         * {@link #setParentScope(IFlowScopeLog)}. Calling both will throw an
          * exception.
          *
          * @param category
@@ -373,7 +395,7 @@ public final class LogUtils {
          *            The parent scope
          * @return This builder
          */
-        public FlowScopeLogBuilder setParentScope(FlowScopeLog parent) {
+        public FlowScopeLogBuilder setParentScope(IFlowScopeLog parent) {
             if (fCategory != null) {
                 throw new IllegalStateException("FlowScopeLogBuilder: Cannot set a parent scope if a category has already been set"); //$NON-NLS-1$
             }
@@ -387,10 +409,10 @@ public final class LogUtils {
          * @return The flow scope log
          */
         public FlowScopeLog build() {
-            FlowScopeLog parent = fParent;
+            IFlowScopeLog parent = fParent;
             if (parent != null) {
                 // Has a parent scope, so step in flow
-                return new FlowScopeLog(fLogger, fLevel, fLabel, parent.fCategory, parent.fId, false, fArgs);
+                return new FlowScopeLog(fLogger, fLevel, fLabel, parent.getCategory(), parent.getId(), false, fArgs);
             }
             return new FlowScopeLog(fLogger, fLevel, fLabel, String.valueOf(fCategory), (fId == Integer.MIN_VALUE ? ID_GENERATOR.incrementAndGet() : fId), !fHasParent, fArgs);
         }
@@ -430,7 +452,7 @@ public final class LogUtils {
      *  INFO: {"ts":"12420,"ph":"f","tid":0,"cat":"category", "id":256}
      * }</pre>
      */
-    public static class FlowScopeLog implements AutoCloseable {
+    public static class FlowScopeLog implements IFlowScopeLog, AutoCloseable {
 
         private final long fThreadId;
         private final Logger fLogger;
@@ -541,12 +563,12 @@ public final class LogUtils {
             fData.put(name, value);
         }
 
-        /**
-         * Get the ID for this scope. The ID can be injected to other components
-         * that can use it for the scope loggers
-         *
-         * @return The ID of this scope
-         */
+        @Override
+        public String getCategory() {
+            return fCategory;
+        }
+
+        @Override
         public int getId() {
             return fId;
         }

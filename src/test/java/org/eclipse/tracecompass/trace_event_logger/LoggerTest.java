@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -39,6 +39,7 @@ import java.util.logging.StreamHandler;
 
 import org.eclipse.tracecompass.trace_event_logger.LogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.trace_event_logger.LogUtils.FlowScopeLogBuilder;
+import org.eclipse.tracecompass.trace_event_logger.LogUtils.IFlowScopeLog;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -349,7 +350,7 @@ public class LoggerTest {
 
     /**
      * Test the flow scope builder calling
-     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setParentScope(IFlowScopeLog)}, then
      * {@link FlowScopeLogBuilder#setCategory(String)}.
      */
     @Test(expected = IllegalStateException.class)
@@ -366,7 +367,7 @@ public class LoggerTest {
 
     /**
      * Test the flow scope builder calling
-     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setParentScope(IFlowScopeLog)}, then
      * {@link FlowScopeLogBuilder#setCategory(String)}.
      */
     @Test(expected = IllegalStateException.class)
@@ -384,7 +385,7 @@ public class LoggerTest {
 
     /**
      * Test the flow scope builder calling
-     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setParentScope(IFlowScopeLog)}, then
      * {@link FlowScopeLogBuilder#setCategory(String)}.
      */
     @Test(expected = IllegalStateException.class)
@@ -401,7 +402,7 @@ public class LoggerTest {
 
     /**
      * Test the flow scope builder calling
-     * {@link FlowScopeLogBuilder#setParentScope(FlowScopeLog)}, then
+     * {@link FlowScopeLogBuilder#setParentScope(IFlowScopeLog)}, then
      * {@link FlowScopeLogBuilder#setCategory(String)}.
      */
     @Test(expected = IllegalStateException.class)
