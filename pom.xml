@@ -178,7 +178,6 @@
         <targetPath>META-INF</targetPath>
       </resource>
     </resources>
-    
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
@@ -210,6 +209,11 @@
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>3.1.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+         <version>6.0.0</version>
         </plugin>
         <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>
@@ -258,5 +262,28 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+         <configuration>
+           <archive>
+             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+           </archive>
+         </configuration>
+        </plugin>
+        <plugin>
+         <groupId>org.apache.felix</groupId>
+         <artifactId>maven-bundle-plugin</artifactId>
+         <executions>
+           <execution>
+             <id>bundle-manifest</id>
+             <phase>process-classes</phase>
+             <goals>
+               <goal>manifest</goal>
+             </goals>
+           </execution>
+         </executions>
+       </plugin>
+    </plugins>
   </build>
 </project>
