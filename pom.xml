@@ -31,7 +31,7 @@
   </developers>
   <groupId>org.eclipse.tracecompass</groupId>
   <artifactId>trace-event-logger</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
   <packaging>jar</packaging>
   <name>Trace Compass Trace Event Logger</name>
   <description>This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.</description>
