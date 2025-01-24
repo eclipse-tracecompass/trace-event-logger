@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -21,7 +21,7 @@
  *
  * SPDX-License-Identifier: MIT
  *******************************************************************************/
-package org.eclipse.tracecompass.trace_event_logger;
+package org.eclipse.tracecompass.traceeventlogger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,7 +63,7 @@ public class AsyncFileHandlerTest {
     @Test
     public void testConfigure() {
         try (InputStream fis = new FileInputStream(
-                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/logging.properties"))) { //$NON-NLS-1$
+                new File("./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/logging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
             Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -81,7 +81,7 @@ public class AsyncFileHandlerTest {
     @Test
     public void testGoodConfigure() {
         try (InputStream fis = new FileInputStream(
-                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/goodlogging.properties"))) { //$NON-NLS-1$
+                new File("./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/goodlogging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
             Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -104,11 +104,11 @@ public class AsyncFileHandlerTest {
     @Test
     public void testBadConfigure() throws SecurityException, IOException {
         try (InputStream fis = new FileInputStream(
-                new File("./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/badlogging.properties"))) { //$NON-NLS-1$
+                new File("./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/badlogging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             try {
                 manager.readConfiguration(fis);
-                String prop = manager.getProperty("org.eclipse.tracecompass.trace_event_logger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
+                String prop = manager.getProperty("org.eclipse.tracecompass.traceeventlogger.SnapshotHandler.maxEvents"); //$NON-NLS-1$
                 assertNotNull(prop);
             } catch (IOException e) {
                 fail(e.getMessage());
