@@ -21,7 +21,7 @@
  *
  * SPDX-License-Identifier: MIT
  *******************************************************************************/
-package org.eclipse.tracecompass.trace_event_logger;
+package org.eclipse.tracecompass.traceeventlogger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,9 +37,9 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-import org.eclipse.tracecompass.trace_event_logger.LogUtils.FlowScopeLog;
-import org.eclipse.tracecompass.trace_event_logger.LogUtils.FlowScopeLogBuilder;
-import org.eclipse.tracecompass.trace_event_logger.LogUtils.IFlowScopeLog;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLog;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLogBuilder;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils.IFlowScopeLog;
 import org.junit.Before;
 import org.junit.Test;
 

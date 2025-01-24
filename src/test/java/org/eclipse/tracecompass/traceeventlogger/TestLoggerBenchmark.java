@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -22,7 +22,7 @@
  * SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-package org.eclipse.tracecompass.trace_event_logger;
+package org.eclipse.tracecompass.traceeventlogger;
 
 import static org.junit.Assert.fail;
 
@@ -379,7 +379,7 @@ public class TestLoggerBenchmark {
 
     private static Handler makeAsyncFileHandler(String path) throws IOException {
         try (InputStream fis = new FileInputStream(new File(
-                "./src/test/java/org/eclipse/tracecompass/trace_event_logger/res/benchmarklogging.properties"))) { //$NON-NLS-1$
+                "./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/benchmarklogging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
         }

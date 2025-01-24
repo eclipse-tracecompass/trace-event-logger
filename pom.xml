@@ -10,8 +10,8 @@
     </license>
   </licenses>
   <organization>
-    <name>Eclipse Foundation</name>
-    <url>https://www.eclipse.org/</url>
+    <name>Eclipse Trace Compass</name>
+    <url>https://github.com/eclipse-tracecompass/trace-event-logger</url>
   </organization>
   <issueManagement>
     <url>https://github.com/eclipse-tracecompass/trace-event-logger/issues</url>
@@ -33,13 +33,11 @@
   <artifactId>trace-event-logger</artifactId>
   <version>0.1.1</version>
   <packaging>jar</packaging>
-  <name>trace-event-logger</name>
+  <name>Trace Compass Trace Event Logger</name>
   <description>This logger is based on JUL to allow fast JSON traces to be written to disk. It is not lockless or nanosecond precise, but is fast and simple to use and configure.</description>
   <!-- the project's website -->
-  <url>https://eclipse.dev/tracecompass</url>
+  <url>https://github.com/eclipse-tracecompass/trace-event-logger</url>
 
-
-  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -265,25 +263,25 @@
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-         <configuration>
-           <archive>
-             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-           </archive>
-         </configuration>
-        </plugin>
-        <plugin>
-         <groupId>org.apache.felix</groupId>
-         <artifactId>maven-bundle-plugin</artifactId>
-         <executions>
-           <execution>
-             <id>bundle-manifest</id>
-             <phase>process-classes</phase>
-             <goals>
-               <goal>manifest</goal>
-             </goals>
-           </execution>
-         </executions>
-       </plugin>
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

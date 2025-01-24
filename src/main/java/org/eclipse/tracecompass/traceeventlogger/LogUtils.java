@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -21,8 +21,7 @@
  *
  * SPDX-License-Identifier: MIT
  *******************************************************************************/
-
-package org.eclipse.tracecompass.trace_event_logger;
+package org.eclipse.tracecompass.traceeventlogger;
 
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -32,17 +31,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * Note: this was TraceCompassLogUtil copied as-is. It is relicensed to MIT,
- * permissions from all contributing parties were obtained. This is used for
- * testing purposes only.
- *
  * Logger helper
  *
  * This is a logger helper, it will allow entry-exit analysis to be much easier.
@@ -105,8 +102,7 @@ import java.util.logging.Logger;
  * {@link #traceObjectDestruction(Logger, Level, Object)}
  *
  * The design philosophy of this class is very heavily inspired by the trace
- * event format of Google. The full specification is available <a
- * href=https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#>here</a>.
+ * event format of Google. The full specification is available @see <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#">here</a>.
  * <p>
  *
  * The main goals are clarity of output and simplicity for the developer.
@@ -114,11 +110,35 @@ import java.util.logging.Logger;
  * minor performance impact compared to simply logging the events is to be
  * expected.
  *
+ * <strong>This class is not intended to be instantiated by clients. It
+ *                is a helper class.</strong>
+
  * @author Matthew Khouzam
- * @noinstantiate This class is not intended to be instantiated by clients. It
- *                is a helper class.
+ *
  */
-public final class OldLogUtils {
+public final class LogUtils {
+
+    /**
+     * Interface for flow scope logger
+     */
+    public interface IFlowScopeLog {
+
+        /**
+         * Get the category for this scope. The category can be injected to
+         * other components that can use it for the scope loggers
+         *
+         * @return The category of this scope
+         */
+        String getCategory();
+
+        /**
+         * Get the ID for this scope. The ID can be injected to other components
+         * that can use it for the scope loggers
+         *
+         * @return The ID of this scope
+         */
+        int getId();
+    }
 
     private static final Format FORMAT = new DecimalFormat("#.###"); //$NON-NLS-1$
 
@@ -134,10 +154,49 @@ public final class OldLogUtils {
     private static final String TIMESTAMP = "ts"; //$NON-NLS-1$
     private static final String PHASE = "ph"; //$NON-NLS-1$
 
-    private static final String ARGS_ERROR_MESSAGE = "Data should be in the form of key, value, key1, value1, ... oldScopeLog was supplied "; //$NON-NLS-1$
+    private static final String ARGS_ERROR_MESSAGE = "Data should be in the form of key, value, key1, value1, ... Trace Event Scope Log was supplied "; //$NON-NLS-1$
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
 
-    private OldLogUtils() {
+    /**
+     * A log record with extra data that lazy-forms the message.
+     */
+    public static class TraceEventLogRecord extends LogRecord {
+        private static final long serialVersionUID = 8970603767997599454L;
+        private transient final Supplier<String> fSupplier;
+        /** message cache, lazy inited */
+        private String fMessage = null;
+
+        /**
+         * Construtor
+         *
+         * @param level
+         *            the log level
+         * @param supplier
+         *            the supplier
+         * @param parameters
+         *            the parameters, typically ( number timestamp, char phase,
+         *            String thread id)
+         */
+        public TraceEventLogRecord(Level level, Supplier<String> supplier, Object... parameters) {
+            super(level, ""); //$NON-NLS-1$
+            this.fSupplier = supplier;
+            setParameters(parameters);
+        }
+
+        @Override
+        public String getMessage() {
+            synchronized (this) {
+                String msg = fMessage;
+                if (msg == null) {
+                    msg = Objects.requireNonNull(fSupplier.get());
+                    fMessage = msg;
+                }
+                return msg;
+            }
+        }
+    }
+
+    private LogUtils() {
         // do nothing
     }
 
@@ -150,21 +209,19 @@ public final class OldLogUtils {
      *
      * Usage:
      *
-     * <pre>
-     * {@code usage of ScopeLog}
+     * <pre>{@code usage of ScopeLog
      *  try (ScopeLog linksLogger = new ScopeLog(LOGGER, Level.CONFIG, "Perform Query")) { //$NON-NLS-1$
      *      ss.updateAllReferences();
      *      dataStore.addAll(ss.query(ts, trace));
      *  }
-     * </pre>
+     * }</pre>
      * <p>
      * will generate the following trace
      *
-     * <pre>
-     * {@code trace output}
+     * <pre>{@code trace output
      *  INFO: {"ts":12345,"ph":"B",tid:1,"name:Perform Query"}
      *  INFO: {"ts":"12366,"ph":"E","tid":1}
-     * </pre>
+     * }</pre>
      */
     public static class ScopeLog implements AutoCloseable {
 
@@ -197,6 +254,7 @@ public final class OldLogUtils {
             fThreadId = Thread.currentThread().getId();
             fLabel = label;
             char phase = 'B';
+            validateArgs(args);
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
                 sb.append('{');
@@ -206,7 +264,7 @@ public final class OldLogUtils {
                 sb.append('}');
                 return sb.toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new TraceEventLogRecord(fLevel, msgSupplier, fTime, phase, fThreadId));
         }
 
         /**
@@ -216,7 +274,7 @@ public final class OldLogUtils {
          *
          * If the timing information is important than it would be more
          * appropriate to call
-         * {@link OldLogUtils#traceInstant(Logger, Level, String, Object...)}
+         * {@link LogUtils#traceInstant(Logger, Level, String, Object...)}
          *
          * @param name
          *            the name of the field
@@ -237,7 +295,7 @@ public final class OldLogUtils {
                 appendCommon(sb, phase, time, fThreadId);
                 return appendArgs(sb, fData).append('}').toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new TraceEventLogRecord(fLevel, msgSupplier, time, phase, fThreadId));
         }
     }
 
@@ -256,7 +314,7 @@ public final class OldLogUtils {
         private final Object[] fArgs;
         private int fId = Integer.MIN_VALUE;
         private String fCategory = null;
-        private FlowScopeLog fParent = null;
+        private IFlowScopeLog fParent = null;
         private boolean fHasParent = false;
 
         /**
@@ -277,6 +335,7 @@ public final class OldLogUtils {
             fLevel = level;
             fLabel = label;
             fArgs = args;
+            validateArgs(args);
         }
 
         /**
@@ -284,7 +343,7 @@ public final class OldLogUtils {
          * will be automatically generated.
          *
          * This method is mutually exclusive with
-         * {@link #setParentScope(FlowScopeLog)}. Calling both will throw an
+         * {@link #setParentScope(IFlowScopeLog)}. Calling both will throw an
          * exception.
          *
          * @param category
@@ -293,8 +352,7 @@ public final class OldLogUtils {
          */
         public FlowScopeLogBuilder setCategory(String category) {
             if (fParent != null) {
-                throw new IllegalStateException(
-                        "FlowScopeLogBuilder: Cannot set a category if a parent has already been set"); //$NON-NLS-1$
+                throw new IllegalStateException("FlowScopeLogBuilder: Cannot set a category if a parent has already been set"); //$NON-NLS-1$
             }
             fCategory = category;
             return this;
@@ -304,7 +362,7 @@ public final class OldLogUtils {
          * Set a category and ID for the flow scope.
          *
          * This method is mutually exclusive with
-         * {@link #setParentScope(FlowScopeLog)}. Calling both will throw an
+         * {@link #setParentScope(IFlowScopeLog)}. Calling both will throw an
          * exception.
          *
          * @param category
@@ -315,8 +373,7 @@ public final class OldLogUtils {
          */
         public FlowScopeLogBuilder setCategoryAndId(String category, int id) {
             if (fParent != null) {
-                throw new IllegalStateException(
-                        "FlowScopeLogBuilder: Cannot set a category if a parent has already been set"); //$NON-NLS-1$
+                throw new IllegalStateException("FlowScopeLogBuilder: Cannot set a category if a parent has already been set"); //$NON-NLS-1$
             }
             fCategory = category;
             fId = id;
@@ -338,10 +395,9 @@ public final class OldLogUtils {
          *            The parent scope
          * @return This builder
          */
-        public FlowScopeLogBuilder setParentScope(FlowScopeLog parent) {
+        public FlowScopeLogBuilder setParentScope(IFlowScopeLog parent) {
             if (fCategory != null) {
-                throw new IllegalStateException(
-                        "FlowScopeLogBuilder: Cannot set a parent scope if a category has already been set"); //$NON-NLS-1$
+                throw new IllegalStateException("FlowScopeLogBuilder: Cannot set a parent scope if a category has already been set"); //$NON-NLS-1$
             }
             fParent = parent;
             return this;
@@ -353,13 +409,12 @@ public final class OldLogUtils {
          * @return The flow scope log
          */
         public FlowScopeLog build() {
-            FlowScopeLog parent = fParent;
+            IFlowScopeLog parent = fParent;
             if (parent != null) {
                 // Has a parent scope, so step in flow
-                return new FlowScopeLog(fLogger, fLevel, fLabel, parent.fCategory, parent.fId, false, fArgs);
+                return new FlowScopeLog(fLogger, fLevel, fLabel, parent.getCategory(), parent.getId(), false, fArgs);
             }
-            return new FlowScopeLog(fLogger, fLevel, fLabel, String.valueOf(fCategory),
-                    (fId == Integer.MIN_VALUE ? ID_GENERATOR.incrementAndGet() : fId), !fHasParent, fArgs);
+            return new FlowScopeLog(fLogger, fLevel, fLabel, String.valueOf(fCategory), (fId == Integer.MIN_VALUE ? ID_GENERATOR.incrementAndGet() : fId), !fHasParent, fArgs);
         }
 
     }
@@ -375,30 +430,29 @@ public final class OldLogUtils {
      * can be used in scatter-gather/map-reduce operations as well as threads
      * that trigger a UI Thread operation.
      *
-     * <pre>
-     * {@code usage of FlowScopeLog}
+     * <pre>{@code usage of FlowScopeLog
      *  try (FlowScopeLog linksLogger = new FlowScopeLog(LOGGER, Level.CONFIG, "Perform Query", "category", 0x100)) { //$NON-NLS-1$
      *      Display.asynchExec(()->{
-     *      try(FlowScopeLog linksLogger2 = new FlowScopeLog(LOGGER, Level.CONFIG, "Update UI", "category", linksLogger.getId()) {
-     *          linksLogger.step("updating ui");
-     *      };
+     *          try(FlowScopeLog linksLogger2 = new FlowScopeLog(LOGGER, Level.CONFIG, "Update UI", "category", linksLogger.getId()) {
+     *              linksLogger.step("updating ui");
+     *          };
+     *      }
      *      linksLogger.step("forked thread");
      *  }
-     * </pre>
+     * }</pre>
      * <p>
      * will generate the following trace (order not guaranteed)
      *
-     * <pre>
-     * {@code trace output}
+     * <pre>{@code trace output
      *  INFO: {"ts":12345,"ph":"s",tid:1,"name":"Perform Query", "cat":"category", "id":256}
      *  INFO: {"ts":12346","ph":"t",tid:1,"name":"forked thread","cat":"category", "id":256}
      *  INFO: {"ts":"12366,"ph":"f","tid":1,"cat":"category", "id":256}
      *  INFO: {"ts":12400,"ph":"s",tid:0,"name":"Update UI","cat":"category", "id":256}
      *  INFO: {"ts":12416","ph":"t",tid:0,"name":"updating ui", "cat":"category", "id":256}
      *  INFO: {"ts":"12420,"ph":"f","tid":0,"cat":"category", "id":256}
-     * </pre>
+     * }</pre>
      */
-    public static class FlowScopeLog implements AutoCloseable {
+    public static class FlowScopeLog implements IFlowScopeLog, AutoCloseable {
 
         private final long fThreadId;
         private final Logger fLogger;
@@ -406,6 +460,7 @@ public final class OldLogUtils {
         private final int fId;
         private final String fCategory;
         private final Map<String, Object> fData = new HashMap<>();
+        private final String fLabel;
         private final long fTime;
 
         /**
@@ -428,25 +483,26 @@ public final class OldLogUtils {
          *            the messages to pass, should be in pairs key, value, key2,
          *            value2.... typically arguments
          */
-        private FlowScopeLog(Logger log, Level level, String label, String category, int id, boolean startFlow,
-                Object... args) {
+        private FlowScopeLog(Logger log, Level level, String label, String category, int id, boolean startFlow, Object... args) {
             fTime = System.nanoTime();
             fId = id;
             fLogger = log;
             fLevel = level;
             fCategory = category;
+            fLabel = label;
             fThreadId = Thread.currentThread().getId();
             char phaseB = 'B';
+            validateArgs(args);
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
                 sb.append('{');
                 appendCommon(sb, phaseB, fTime, fThreadId);
-                appendName(sb, label);
+                appendName(sb, fLabel);
                 appendArgs(sb, args);
                 sb.append('}');
                 return sb.toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new LogUtils.TraceEventLogRecord(fLevel, msgSupplier, fTime, phaseB, fThreadId));
             // Add a flow event, either start or step in enclosing scope
             char phase = startFlow ? 's' : 't';
             msgSupplier = () -> {
@@ -460,7 +516,7 @@ public final class OldLogUtils {
                 sb.append('}');
                 return sb.toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new LogUtils.TraceEventLogRecord(fLevel, msgSupplier, fTime, phase, fThreadId));
         }
 
         /**
@@ -474,6 +530,7 @@ public final class OldLogUtils {
         public void step(String label, Object... args) {
             long time = System.nanoTime();
             char phase = 't';
+            validateArgs(args);
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
                 sb.append('{');
@@ -485,7 +542,7 @@ public final class OldLogUtils {
                 sb.append('}');
                 return sb.toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new LogUtils.TraceEventLogRecord(fLevel, msgSupplier, time, phase, fThreadId));
         }
 
         /**
@@ -506,12 +563,12 @@ public final class OldLogUtils {
             fData.put(name, value);
         }
 
-        /**
-         * Get the ID for this scope. The ID can be injected to other components
-         * that can use it for the scope loggers
-         *
-         * @return The ID of this scope
-         */
+        @Override
+        public String getCategory() {
+            return fCategory;
+        }
+
+        @Override
         public int getId() {
             return fId;
         }
@@ -528,7 +585,7 @@ public final class OldLogUtils {
                 sb.append('}');
                 return sb.toString();
             };
-            fLogger.log(fLevel, msgSupplier);
+            fLogger.log(new LogUtils.TraceEventLogRecord(fLevel, msgSupplier, time, phase, fThreadId));
         }
     }
 
@@ -563,7 +620,7 @@ public final class OldLogUtils {
             appendId(sb, identityHashCode);
             return sb.append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
         return identityHashCode;
     }
 
@@ -593,7 +650,7 @@ public final class OldLogUtils {
             appendId(sb, System.identityHashCode(item));
             return sb.append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -623,7 +680,7 @@ public final class OldLogUtils {
             appendId(sb, uniqueId);
             return sb.append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -644,11 +701,11 @@ public final class OldLogUtils {
      * @param args
      *            Additional arguments to log
      */
-    public static void traceAsyncStart(Logger logger, Level level, String name, String category, int id,
-            Object... args) {
+    public static void traceAsyncStart(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'b';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -658,7 +715,7 @@ public final class OldLogUtils {
             appendId(sb, id);
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -679,11 +736,11 @@ public final class OldLogUtils {
      * @param args
      *            Additional arguments to log
      */
-    public static void traceAsyncNested(Logger logger, Level level, String name, String category, int id,
-            Object... args) {
+    public static void traceAsyncNested(Logger logger, Level level, String name, String category, int id, Object... args) {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'n';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -693,7 +750,7 @@ public final class OldLogUtils {
             appendId(sb, id);
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -718,6 +775,7 @@ public final class OldLogUtils {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'e';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -727,7 +785,7 @@ public final class OldLogUtils {
             appendId(sb, id);
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -751,6 +809,7 @@ public final class OldLogUtils {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'i';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -758,7 +817,7 @@ public final class OldLogUtils {
             appendName(sb, name);
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -778,6 +837,7 @@ public final class OldLogUtils {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'C';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -785,7 +845,7 @@ public final class OldLogUtils {
             appendName(sb, name);
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     /**
@@ -809,6 +869,7 @@ public final class OldLogUtils {
         long time = System.nanoTime();
         long threadId = Thread.currentThread().getId();
         char phase = 'R';
+        validateArgs(args);
         Supplier<String> msgSupplier = () -> {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -818,7 +879,7 @@ public final class OldLogUtils {
             writeObject(sb, "dur", duration); //$NON-NLS-1$
             return appendArgs(sb, args).append('}').toString();
         };
-        logger.log(level, msgSupplier);
+        logger.log(new LogUtils.TraceEventLogRecord(level, msgSupplier, time, phase, threadId));
     }
 
     // -------------------------------------------------------------------------
@@ -852,13 +913,21 @@ public final class OldLogUtils {
     }
 
     private static StringBuilder appendId(StringBuilder sb, int id) {
-        return sb.append(',').append('"').append(ID).append("\":\"0x") //$NON-NLS-1$
-                .append(Integer.toHexString(id)).append('"');
+        return sb.append(',')
+                .append('"')
+                .append(ID)
+                .append("\":\"0x") //$NON-NLS-1$
+                .append(Integer.toHexString(id))
+                .append('"');
     }
 
     private static StringBuilder appendArgs(StringBuilder sb, Map<String, Object> args) {
         if (!args.isEmpty()) {
-            sb.append(',').append('"').append(ARGS).append('"').append(':');
+            sb.append(',')
+                    .append('"')
+                    .append(ARGS)
+                    .append('"')
+                    .append(':');
             Object[] argsArray = new Object[2 * args.size()];
             Iterator<Entry<String, Object>> entryIter = args.entrySet().iterator();
             for (int i = 0; i < args.size(); i++) {
@@ -873,34 +942,48 @@ public final class OldLogUtils {
 
     private static StringBuilder appendArgs(StringBuilder sb, Object... args) {
         if (args.length > 0) {
-            sb.append(',').append('"').append(ARGS).append('"').append(':');
+            sb.append(',')
+                    .append('"')
+                    .append(ARGS)
+                    .append('"')
+                    .append(':');
             getArgs(sb, args);
         }
         return sb;
     }
 
+	private static void validateArgs(Object[] data) {
+		if (data.length == 1) {
+			return;
+		}
+		if (data.length % 2 != 0) {
+			throw new IllegalArgumentException(
+					ARGS_ERROR_MESSAGE + "an odd number of messages" + Arrays.asList(data).toString()); //$NON-NLS-1$
+		}
+		Set<String> tester = new HashSet<>();
+		for (int i = 0; i < data.length - 1; i += 2) {
+			String keyVal = String.valueOf(data[i]);
+			if (tester.contains(keyVal)) {
+				throw new IllegalArgumentException(ARGS_ERROR_MESSAGE + "an duplicate field names : " + keyVal); //$NON-NLS-1$
+			}
+			tester.add(keyVal);
+		}
+	}
+
     private static StringBuilder getArgs(StringBuilder appendTo, Object[] data) {
         if (data.length == 0) {
             return appendTo;
         }
-        Set<String> tester = new HashSet<>();
+        validateArgs(data);
         appendTo.append('{');
         if (data.length == 1) {
             // not in contract, but let's assume here that people are still new
             // at this
             appendTo.append("\"msg\":\"").append(data[0]).append('"'); //$NON-NLS-1$
         } else {
-            if (data.length % 2 != 0) {
-                throw new IllegalArgumentException(
-                        ARGS_ERROR_MESSAGE + "an odd number of messages" + Arrays.asList(data).toString()); //$NON-NLS-1$
-            }
             for (int i = 0; i < data.length - 1; i += 2) {
                 Object value = data[i + 1];
                 String keyVal = String.valueOf(data[i]);
-                if (tester.contains(keyVal)) {
-                    throw new IllegalArgumentException(ARGS_ERROR_MESSAGE + "an duplicate field names : " + keyVal); //$NON-NLS-1$
-                }
-                tester.add(keyVal);
                 if (i > 0) {
                     appendTo.append(',');
                 }
