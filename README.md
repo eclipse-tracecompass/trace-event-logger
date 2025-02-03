@@ -70,7 +70,7 @@ one needs to add to the try-with-resources block a scopewriter
 import java.io.FileWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.tracecompass.trace_event_logger.LogUtils;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils;
 
 public class SlappyWag {
     
@@ -182,6 +182,6 @@ user@host:~$ java -Djava.util.logging.config.file=path/to/logging.properties -p 
 
 There are two new `handler`s introduced.
 
-* The AsyncFileHandler: `org.eclipse.tracecompass.trace_event_logger.AsyncFileHandler` in the logging properties. It handles serialization and writing to disk in a separate thread from the caller. Note: this will require explicitly killing a process when it exits as it is a separate thread.
+* The AsyncFileHandler: `org.eclipse.tracecompass.traceeventlogger.AsyncFileHandler` in the logging properties. It handles serialization and writing to disk in a separate thread from the caller. Note: this will require explicitly killing a process when it exits as it is a separate thread.
 
-* The SnapshotHandler: `org.eclipse.tracecompass.trace_event_logger.SnapshotHandler` in the logging properties. It writes all events to a fixed length queue (culling at the front when full) and dumps the entire queue to disk when a defined latency is hit, for example when a span lasts over 30 seconds.
+* The SnapshotHandler: `org.eclipse.tracecompass.traceeventlogger.SnapshotHandler` in the logging properties. It writes all events to a fixed length queue (culling at the front when full) and dumps the entire queue to disk when a defined latency is hit, for example when a span lasts over 30 seconds.
