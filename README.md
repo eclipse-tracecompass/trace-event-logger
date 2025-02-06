@@ -143,6 +143,9 @@ While one could open the traces in their favorite text editor, results are bette
 python3 jsonify.py LOG_FILE log.json
 ```
 
+Another option would be to add the `-DenableLogging=true` flag to enable the JMX beans counters. These can be read using VisualVM or jconsole.
+
+
 [Video tutorial](https://www.youtube.com/watch?v=YCdzmcpOrK4)
 
 ## Performance
@@ -155,6 +158,7 @@ One could also take advantage of the cache effect. If the data is not saturating
 | Instrumentation  |    72 ns |
 | AsyncFileHandler |  1100 ns |
 | FileHandler      | 45000 ns |
+| Beans Enabled AsyncFileHandler |  1400 ns |
 
 ## Design Philosophy
 
