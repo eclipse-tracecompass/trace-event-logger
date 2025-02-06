@@ -143,6 +143,8 @@ While one could open the traces in their favorite text editor, results are bette
 python3 jsonify.py LOG_FILE log.json
 ```
 
+Another option would be to add the `-DenableMonitoring=true` flag to enable the JMX beans counters. These can be read using VisualVM or jconsole.
+
 [Video tutorial](https://www.youtube.com/watch?v=YCdzmcpOrK4)
 
 ## Performance
@@ -150,11 +152,12 @@ python3 jsonify.py LOG_FILE log.json
 On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, using an `AsyncFileHandler` instead of the classic `FileHandler` leads to events being logged from 45 us/event (`FileHandler`) to 1.1 us/event (`AsyncFileHandler`). In other words, `AsyncFileHandler` can write 900k events in the time it takes FileHandler to write 22k events
 One could also take advantage of the cache effect. If the data is not saturating the IO, speed is even higher.
 
-| Action           | Overhead |
-|------------------|---------:|
-| Instrumentation  |    72 ns |
-| AsyncFileHandler |  1100 ns |
-| FileHandler      | 45000 ns |
+| Action                         | Overhead |
+|--------------------------------|---------:|
+| Instrumentation                |    72 ns |
+| AsyncFileHandler               |  1100 ns |
+| FileHandler                    | 45000 ns |
+| Beans-Enabled AsyncFileHandler |  1400 ns |
 
 ## Design Philosophy
 

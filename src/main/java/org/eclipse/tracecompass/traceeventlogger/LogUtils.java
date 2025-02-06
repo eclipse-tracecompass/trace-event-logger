@@ -39,6 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.eclipse.tracecompass.traceeventlogger.beans.TraceEventLoggerManager;
+
 /**
  * Logger helper
  *
@@ -296,6 +298,7 @@ public final class LogUtils {
                 return appendArgs(sb, fData).append('}').toString();
             };
             fLogger.log(new TraceEventLogRecord(fLevel, msgSupplier, time, phase, fThreadId));
+            TraceEventLoggerManager.getInstance().update(fLabel, time - fTime);
         }
     }
 
@@ -586,6 +589,7 @@ public final class LogUtils {
                 return sb.toString();
             };
             fLogger.log(new LogUtils.TraceEventLogRecord(fLevel, msgSupplier, time, phase, fThreadId));
+            TraceEventLoggerManager.getInstance().update(fLabel, time - fTime);
         }
     }
 
