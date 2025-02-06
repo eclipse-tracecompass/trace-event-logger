@@ -150,6 +150,12 @@ python3 jsonify.py LOG_FILE log.json
 On an Intel i5-1145G7 @ 2.60GHz with an NVME hard drive, using an `AsyncFileHandler` instead of the classic `FileHandler` leads to events being logged from 45 us/event (`FileHandler`) to 1.1 us/event (`AsyncFileHandler`). In other words, `AsyncFileHandler` can write 900k events in the time it takes FileHandler to write 22k events
 One could also take advantage of the cache effect. If the data is not saturating the IO, speed is even higher.
 
+| Action           | Overhead |
+|------------------|---------:|
+| Instrumentation  |    72 ns |
+| AsyncFileHandler |  1100 ns |
+| FileHandler      | 45000 ns |
+
 ## Design Philosophy
 
 The design philosophy of this class is heavily inspired by the trace event format of Google. The full specification is available [here](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?pli=1#).
