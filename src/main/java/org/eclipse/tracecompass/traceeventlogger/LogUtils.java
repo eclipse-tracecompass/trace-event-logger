@@ -144,6 +144,32 @@ public final class LogUtils {
 
     private static final Format FORMAT = new DecimalFormat("#.###"); //$NON-NLS-1$
 
+    /**
+     * Offset between System.currentTimeMillis() and System.nanoTime() in nanoseconds.
+     * Used to convert between the two time bases while maintaining nanosecond precision.
+     */
+    private static final long TIME_OFFSET;
+    static {
+        // Get current time in both bases
+        long currentMillis = System.currentTimeMillis();
+        long nanoTime = System.nanoTime();
+        
+        // Convert millis to nanos and calculate offset, handling potential overflow
+        long millisToNanos = currentMillis * 1_000_000L;
+        TIME_OFFSET = millisToNanos - nanoTime;
+    }
+
+    /**
+     * Gets the current time in nanoseconds since the Unix epoch.
+     * This maintains nanosecond precision while being comparable to timestamps from
+     * System.currentTimeMillis().
+     * 
+     * @return Current time in nanoseconds since Unix epoch
+     */
+    private static long currentTimeNanos() {
+        return System.nanoTime() + TIME_OFFSET;
+    }
+
     /*
      * Field names
      */
@@ -250,7 +276,7 @@ public final class LogUtils {
          *            beginning of the scope
          */
         public ScopeLog(Logger log, Level level, String label, Object... args) {
-            fTime = System.nanoTime();
+            fTime = currentTimeNanos();
             fLogger = log;
             fLevel = level;
             fThreadId = Thread.currentThread().getId();
@@ -289,7 +315,7 @@ public final class LogUtils {
 
         @Override
         public void close() {
-            long time = System.nanoTime();
+            long time = currentTimeNanos();
             char phase = 'E';
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
@@ -487,7 +513,7 @@ public final class LogUtils {
          *            value2.... typically arguments
          */
         private FlowScopeLog(Logger log, Level level, String label, String category, int id, boolean startFlow, Object... args) {
-            fTime = System.nanoTime();
+            fTime = currentTimeNanos();
             fId = id;
             fLogger = log;
             fLevel = level;
@@ -531,7 +557,7 @@ public final class LogUtils {
          *            the arguments to log
          */
         public void step(String label, Object... args) {
-            long time = System.nanoTime();
+            long time = currentTimeNanos();
             char phase = 't';
             validateArgs(args);
             Supplier<String> msgSupplier = () -> {
@@ -578,7 +604,7 @@ public final class LogUtils {
 
         @Override
         public void close() {
-            long time = System.nanoTime();
+            long time = currentTimeNanos();
             char phase = 'E';
             Supplier<String> msgSupplier = () -> {
                 StringBuilder sb = new StringBuilder();
@@ -612,7 +638,7 @@ public final class LogUtils {
      * @return The unique ID of this object (there may be collisions)
      */
     public static int traceObjectCreation(Logger logger, Level level, Object item) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         int identityHashCode = System.identityHashCode(item);
         char phase = 'N';
@@ -643,7 +669,7 @@ public final class LogUtils {
      *            the Object to trace
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
@@ -673,7 +699,7 @@ public final class LogUtils {
      *            The unique ID
      */
     public static void traceObjectDestruction(Logger logger, Level level, Object item, int uniqueId) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'D';
         Supplier<String> msgSupplier = () -> {
@@ -706,7 +732,7 @@ public final class LogUtils {
      *            Additional arguments to log
      */
     public static void traceAsyncStart(Logger logger, Level level, String name, String category, int id, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'b';
         validateArgs(args);
@@ -741,7 +767,7 @@ public final class LogUtils {
      *            Additional arguments to log
      */
     public static void traceAsyncNested(Logger logger, Level level, String name, String category, int id, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'n';
         validateArgs(args);
@@ -776,7 +802,7 @@ public final class LogUtils {
      *            Additional arguments to log
      */
     public static void traceAsyncEnd(Logger logger, Level level, String name, String category, int id, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'e';
         validateArgs(args);
@@ -810,7 +836,7 @@ public final class LogUtils {
      *            Additional arguments to log
      */
     public static void traceInstant(Logger logger, Level level, String name, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'i';
         validateArgs(args);
@@ -838,7 +864,7 @@ public final class LogUtils {
      *            The counters to log in the format : "title", value
      */
     public static void traceCounter(Logger logger, Level level, String name, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'C';
         validateArgs(args);
@@ -870,7 +896,7 @@ public final class LogUtils {
      *            "color" and an rbga will be used
      */
     public static void traceMarker(Logger logger, Level level, String name, long duration, Object... args) {
-        long time = System.nanoTime();
+        long time = currentTimeNanos();
         long threadId = Thread.currentThread().getId();
         char phase = 'R';
         validateArgs(args);
