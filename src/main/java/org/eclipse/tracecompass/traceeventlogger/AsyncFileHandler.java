@@ -322,7 +322,7 @@ public class AsyncFileHandler extends StreamHandler {
     @Override
     public boolean isLoggable(LogRecord record) {
         // add feature switch here
-        return super.isLoggable(record) && (record instanceof TraceEventLogRecord);
+        return fFileHandler.isLoggable(record) && (record instanceof TraceEventLogRecord);
     }
 
     @Override

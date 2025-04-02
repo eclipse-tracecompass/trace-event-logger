@@ -85,6 +85,7 @@ public class AsyncFileHandlerTest {
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
             Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals(Level.FINER, first.getLevel());
             first.close();
         } catch (FileNotFoundException e) {
             fail(e.getMessage());
