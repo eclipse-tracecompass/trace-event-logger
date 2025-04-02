@@ -176,6 +176,10 @@ public class TestLoggerBenchmark {
                     }
                 }
             }
+            /*
+             * Note, that the instances of LogRecord created by OldLogUtils.ScopeLog won't be written to disk by the
+             * AsyncFileHandler since they are not instances of TraceEventLogRecord.
+             */
             long end = System.nanoTime();
             asyncNew.add(end - start);
             for (long i = 0; i < warmUp; i++) {
@@ -227,7 +231,14 @@ public class TestLoggerBenchmark {
     @After
     public void waiting() {
         try {
-            while (linecount(files[0].toPath()) != linecount(files[1].toPath())) {
+            int nbRetries = 0;
+            int maxRetries = 25;
+            /*
+             * Note, that files[1] has half of number of events than files[0] because the instances of LogRecord created by
+             * OldLogUtils.ScopeLog won't be written to disk by the AsyncFileHandler since they are not instances of
+             * TraceEventLogRecord.
+             */
+            while (linecount(files[0].toPath()) != (2 * linecount(files[1].toPath())) && (nbRetries < maxRetries)) {
                 if (oldFileHandler != null) {
                     oldFileHandler.close();
                 }
@@ -235,7 +246,12 @@ public class TestLoggerBenchmark {
                     newFileHandler.close();
                 }
                 Thread.sleep(100);
-
+                nbRetries++;
+            }
+            if (nbRetries >= maxRetries) {
+                System.out.println("Max retries (" + nbRetries //$NON-NLS-1$
+                        + ") reached: line count of file[0]=" + linecount(files[0].toPath()) //$NON-NLS-1$
+                        + ", line count of file[1]=" + linecount(files[1].toPath())); //$NON-NLS-1$
             }
         } catch (IOException | InterruptedException e) {
             fail(e.toString());
