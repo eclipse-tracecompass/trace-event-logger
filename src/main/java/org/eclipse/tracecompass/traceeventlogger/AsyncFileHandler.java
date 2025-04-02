@@ -322,7 +322,7 @@ public class AsyncFileHandler extends StreamHandler {
     @Override
     public boolean isLoggable(LogRecord record) {
         // add feature switch here
-        return super.isLoggable(record) && (record instanceof TraceEventLogRecord);
+        return fFileHandler.isLoggable(record) && (record instanceof TraceEventLogRecord);
     }
 
     @Override
@@ -333,10 +333,12 @@ public class AsyncFileHandler extends StreamHandler {
     @Override
     public synchronized void publish(LogRecord record) {
         try {
-            fRecordBuffer.add(record);
-            if (fRecordBuffer.size() >= fMaxSize && isLoggable(record)) {
-                fQueue.put(fRecordBuffer);
-                fRecordBuffer = new ArrayList<>(fMaxSize);
+            if (isLoggable(record)) {
+                fRecordBuffer.add(record);
+                if (fRecordBuffer.size() >= fMaxSize) {
+                    fQueue.put(fRecordBuffer);
+                    fRecordBuffer = new ArrayList<>(fMaxSize);
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
