@@ -43,6 +43,7 @@ import java.util.logging.StreamHandler;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,6 +57,7 @@ public class LoggerWithHandlerTest {
     private Logger fLogger;
     private StreamHandler fStreamHandler;
     private File fTempFile;
+    private String originalFormat;
 
     /**
      * Set up logger
@@ -63,6 +65,7 @@ public class LoggerWithHandlerTest {
     @Before
     public void before() {
         try {
+            originalFormat = System.getProperty("java.util.logging.SimpleFormatter.format"); //$NON-NLS-1$
             System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n"); //$NON-NLS-1$ //$NON-NLS-2$
             LogManager.getLogManager().reset();
             fLogger = Logger.getAnonymousLogger();
@@ -75,6 +78,18 @@ public class LoggerWithHandlerTest {
 
         } catch (IOException e) {
             fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Cleanup after test execution
+     */
+    @After
+    public void after() {
+        if (originalFormat != null) {
+            System.setProperty("java.util.logging.SimpleFormatter.format", originalFormat); //$NON-NLS-1$
+        } else {
+            System.clearProperty("java.util.logging.SimpleFormatter.format"); //$NON-NLS-1$
         }
     }
 
