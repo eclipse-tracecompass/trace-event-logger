@@ -269,6 +269,7 @@ public class SnapshotTest {
     @After
     public void after() {
         fLogger.removeHandler(fStreamHandler);
+        LogManager.getLogManager().reset();
     }
 
 }
