@@ -66,7 +66,9 @@ public class AsyncFileHandlerTest {
                 new File("./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/logging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
-            Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+            File tmp = File.createTempFile("test", ".json");  //$NON-NLS-1$//$NON-NLS-2$
+            tmp.deleteOnExit();
+            Handler first = new AsyncFileHandler(tmp.getAbsolutePath());
             first.close();
         } catch (FileNotFoundException e) {
             fail(e.getMessage());
@@ -84,7 +86,9 @@ public class AsyncFileHandlerTest {
                 new File("./src/test/java/org/eclipse/tracecompass/traceeventlogger/res/goodlogging.properties"))) { //$NON-NLS-1$
             LogManager manager = LogManager.getLogManager();
             manager.readConfiguration(fis);
-            Handler first = new AsyncFileHandler(File.createTempFile("test", ".json").getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+            File tmp = File.createTempFile("test", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+            tmp.deleteOnExit();
+            Handler first = new AsyncFileHandler(tmp.getAbsolutePath());
             assertEquals(Level.FINER, first.getLevel());
             first.close();
         } catch (FileNotFoundException e) {
@@ -138,6 +142,7 @@ public class AsyncFileHandlerTest {
     @Test
     public void testGetterSetters() throws SecurityException, IOException {
         File test = File.createTempFile("test", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        test.deleteOnExit();
         AsyncFileHandler toTest = new AsyncFileHandler(test.getAbsolutePath());
         toTest.setEncoding("UTF-8"); //$NON-NLS-1$
         assertEquals("UTF-8", toTest.getEncoding()); //$NON-NLS-1$
