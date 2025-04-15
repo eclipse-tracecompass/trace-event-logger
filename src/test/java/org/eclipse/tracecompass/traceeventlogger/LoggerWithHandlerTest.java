@@ -91,6 +91,7 @@ public class LoggerWithHandlerTest {
         } else {
             System.clearProperty("java.util.logging.SimpleFormatter.format"); //$NON-NLS-1$
         }
+        fTempFile.deleteOnExit();
     }
 
     /**

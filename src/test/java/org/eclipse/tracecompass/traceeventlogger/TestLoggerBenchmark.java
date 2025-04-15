@@ -72,7 +72,9 @@ public class TestLoggerBenchmark {
     public void testBench() throws SecurityException, IOException {
         fLogger = Logger.getAnonymousLogger();
         files[0] = File.createTempFile("trace-old", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        files[0].deleteOnExit();
         files[1] = File.createTempFile("trace-new", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        files[1].deleteOnExit();
         oldFileHandler = new FileHandler(files[0].getAbsolutePath());
         oldFileHandler.setFormatter(new Formatter() {
             @Override
@@ -270,7 +272,9 @@ public class TestLoggerBenchmark {
     public void testLeanBench() throws SecurityException, IOException {
         fLogger = Logger.getAnonymousLogger();
         files[0] = File.createTempFile("trace-lean-old", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        files[0].deleteOnExit();
         files[1] = File.createTempFile("trace-lean-new", ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+        files[1].deleteOnExit();
         oldFileHandler = makeFileHandler(files[0].getAbsolutePath());
         fLogger.addHandler(oldFileHandler);
         fLogger.setLevel(Level.ALL);
