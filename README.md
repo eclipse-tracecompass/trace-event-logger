@@ -134,6 +134,89 @@ public class SlappyWag {
 }
 ```
 
+example 3 - enabling/disabling AsyncFileHandler
+
+```java
+import java.io.IOException;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils;
+import java.util.logging.Handler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.io.FileWriter;
+import org.eclipse.tracecompass.traceeventlogger.AsyncFileHandler;
+
+
+// compile:
+// javac -cp ./target/trace-event-logger-0.4.1.jar SlappyWag.java
+
+// run: use argument "yes" to enable tracing
+// java -cp .:./target/trace-event-logger-0.4.1.jar -Djava.util.logging.config.file=./goodlogging.properties SlappyWag yes
+// java -cp .:./target/trace-event-logger-0.4.1.jar -Djava.util.logging.config.file=./goodlogging.properties SlappyWag no
+public class SlappyWag {
+
+    private static Logger logger = Logger.getAnonymousLogger();
+    private static AsyncFileHandler aHandler = null;
+
+    public static void main(String[] args) {
+        boolean enable = false;
+        if (args.length > 0) {
+            String input = args[0].toLowerCase();
+            if (input.equals("yes")) {
+                enable = true;
+            }
+        }
+        initializeLogging(enable);
+
+        // ------ your program
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter("test.txt");
+            System.out.println("The program will write hello 10x between two scope logs\n");
+            try (LogUtils.ScopeLog sl = new LogUtils.ScopeLog(logger, Level.FINE, "writing to file")) {
+                for (int i = 0; i < 10; i++) {
+                    fw.write("Hello world " + i);
+                    fw.flush();
+                }
+            } catch (Exception e) {
+                //
+            }
+
+            LogManager.getLogManager().reset();
+        } catch (IOException e) {
+            //
+        }
+    }
+
+    private static void enableLogging(boolean e) {
+        aHandler.setEnabled(e);
+    }
+
+    private static boolean isLoggingEnabled() {
+        return aHandler.isEnabled();
+    }
+
+    private static void initializeLogging(boolean enable) {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
+        for (Handler handler : Logger.getLogger("").getHandlers()) {
+            if (handler instanceof AsyncFileHandler) {
+                aHandler = (AsyncFileHandler) handler;
+            }
+        }
+
+        System.out.println("enabled?: " + isLoggingEnabled());
+        enableLogging(enable);
+        if (isLoggingEnabled()) {
+            System.out.println("Logging is enabled!");
+        } else {
+            System.out.println("Logging is disabled");
+        }
+    }
+}
+```
+
+
 ## Viewing results
 
 While one could open the traces in their favorite text editor, results are better with a GUI. One could open the resulting json files in either `chrome://tracing` or [Eclipse Trace Compass](https://eclipse.dev/tracecompass/). You will need to install trace event parser support by clicking on the `Tools->Add-ons...` menu and selecting **Trace Compass TraceEvent Parser** in trace compass to load the JSON files. If the trace is malformed due to a handler not being configured properly, the program `jsonify.py` supplied in the root of the project can help restore it. 

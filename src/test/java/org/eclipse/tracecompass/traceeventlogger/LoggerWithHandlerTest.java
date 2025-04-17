@@ -24,6 +24,7 @@
 package org.eclipse.tracecompass.traceeventlogger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -135,6 +136,65 @@ public class LoggerWithHandlerTest {
             assertTrue(pattern.matcher(filledLines.get(0)).matches());
             pattern = Pattern.compile("\\{.*E.*\\}"); //$NON-NLS-1$
             assertTrue(pattern.matcher(filledLines.get(1)).matches());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test disabling/enabling the async handler
+     */
+    @Test
+    public void testEnableDisableHandler() {
+        AsyncFileHandler handler = (AsyncFileHandler) fStreamHandler;
+        List<String> allLines = null;
+        assertNotNull(handler);
+        assertTrue(handler.isEnabled());
+        handler.setEnabled(false);
+        assertFalse(handler.isEnabled());
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(fLogger, Level.INFO, "this should not be logged")) { //$NON-NLS-1$
+            // do something
+            new Object();
+        }
+        handler.flush();
+        try {
+            // arbitrary delay - how long might it take for the traces to appear in the log?
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+        try {
+            allLines = Files.readAllLines(Paths.get(fTempFile.getAbsolutePath()));
+            assertTrue(allLines.size() == 0);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+
+        handler.setEnabled(true);
+        assertTrue(handler.isEnabled());
+        try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(fLogger, Level.INFO, "this should be logged")) { //$NON-NLS-1$
+            // do something
+            new Object();
+        }
+        handler.flush();
+        try {
+            for (int i = 0; i < 10; i++) {
+                allLines = Files.readAllLines(Paths.get(fTempFile.getAbsolutePath()));
+                if (allLines.size() >= 2) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    // ignore
+                }
+            }
+            assertNotNull(allLines);
+            assertTrue(allLines.size() == 2);
+            Pattern pattern = Pattern.compile("\\{.*B.*this should be logged.*\\}"); //$NON-NLS-1$
+            assertTrue(pattern.matcher(allLines.get(0)).matches());
+            pattern = Pattern.compile("\\{.*E.*\\}"); //$NON-NLS-1$
+            assertTrue(pattern.matcher(allLines.get(1)).matches());
         } catch (IOException e) {
             fail(e.getMessage());
         }

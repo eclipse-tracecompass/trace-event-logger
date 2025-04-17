@@ -98,6 +98,7 @@ public class AsyncFileHandler extends StreamHandler {
     private ErrorManager fErrorManager;
     private Formatter fFormatter;
     private Level fLevel;
+    private volatile boolean fIsEnabled = true;
 
     private List<LogRecord> fRecordBuffer = new ArrayList<>(fMaxSize);
     private Timer fTimer = new Timer(false);
@@ -321,8 +322,7 @@ public class AsyncFileHandler extends StreamHandler {
      */
     @Override
     public boolean isLoggable(LogRecord record) {
-        // add feature switch here
-        return fFileHandler.isLoggable(record) && (record instanceof TraceEventLogRecord);
+        return fIsEnabled && fFileHandler.isLoggable(record) && (record instanceof TraceEventLogRecord);
     }
 
     @Override
@@ -343,6 +343,25 @@ public class AsyncFileHandler extends StreamHandler {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Enable or disable async file handler
+     *
+     * @param isEnabled
+     *            true is enabled, false is disabled
+     */
+    public void setEnabled(Boolean isEnabled) {
+        this.fIsEnabled = isEnabled;
+    }
+
+    /**
+     * Is the async file handler enabled?
+     *
+     * @return true if enabled
+     */
+    public boolean isEnabled() {
+        return fIsEnabled;
     }
 
 }

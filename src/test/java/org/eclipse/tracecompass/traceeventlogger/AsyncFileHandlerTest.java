@@ -168,6 +168,9 @@ public class AsyncFileHandlerTest {
         };
         toTest.setFormatter(fmt);
         assertEquals(fmt, toTest.getFormatter());
+        assertEquals(toTest.isEnabled(), true);
+        toTest.setEnabled(false);
+        assertEquals(toTest.isEnabled(), false);
     }
 
 }
