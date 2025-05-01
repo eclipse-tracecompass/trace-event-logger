@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>lrucachedemo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source> <!-- or 17 -->
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.tracecompass</groupId>
+        <artifactId>trace-event-logger</artifactId>
+        <version>0.5.0</version>
+      </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Compiler plugin -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+
+            <!-- Allows running via: mvn exec:java -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-Djava.util.logging.config.file=logging.properties</argument>
+                    <argument>-cp</argument>
+                    <classpath />
+                    <argument>org.eclipse.tracecompass.traceeventlogger.lrucachedemo.Main</argument>
+                    <!-- Pass program args here -->
+                    <argument>--cache-size=24</argument>
+                    <argument>--data-size=25</argument>
+                    <argument>--num-threads=4</argument>
+                    <argument>--readers-startup-delay-ms=30</argument>
+                    <argument>--cache-miss-delay-ms=6</argument>
+                    <argument>--log-warmup=true</argument>
+                    <argument>--verbose=false</argument>
+                  </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,11 @@
+Process traces like so:
+$ ../../../jsonify.py trace.log cache_trace.json
+
+Then open "cache_trace.json" in Trace Compass. Select trace type:
+"Trace Event Format" -> "Generic Trace Event Trace"
+
+If this trace type is not available, you may need to install support
+for it:
+Help -> Install New Software, then search for "trace event". Under 
+category "Trace Types", install:
+"Trace Compass TraceEvent Parser (incubator)"
