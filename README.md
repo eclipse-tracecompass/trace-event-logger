@@ -46,6 +46,7 @@ To use free form tracing, check traceInstant.
 
 ### Examples
 
+(In addition to the examples below, also see under root folder `examples/lrucache` for an example that generates interesting traces, inspired by a real-life investigation about the performance of an application's cache.)
 
 To instrument
 
