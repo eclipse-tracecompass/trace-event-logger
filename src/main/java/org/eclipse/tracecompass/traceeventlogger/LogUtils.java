@@ -23,8 +23,6 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.traceeventlogger;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,7 +140,7 @@ public final class LogUtils {
         int getId();
     }
 
-    private static final Format FORMAT = new DecimalFormat("#.###"); //$NON-NLS-1$
+    private static final String FORMAT = "%d.%03d"; //$NON-NLS-1$
 
     /**
      * Offset between System.currentTimeMillis() and System.nanoTime() in nanoseconds.
@@ -153,7 +151,7 @@ public final class LogUtils {
         // Get current time in both bases
         long currentMillis = System.currentTimeMillis();
         long nanoTime = System.nanoTime();
-        
+
         // Convert millis to nanos and calculate offset, handling potential overflow
         long millisToNanos = currentMillis * 1_000_000L;
         TIME_OFFSET = millisToNanos - nanoTime;
@@ -163,7 +161,7 @@ public final class LogUtils {
      * Gets the current time in nanoseconds since the Unix epoch.
      * This maintains nanosecond precision while being comparable to timestamps from
      * System.currentTimeMillis().
-     * 
+     *
      * @return Current time in nanoseconds since Unix epoch
      */
     private static long currentTimeNanos() {
@@ -920,7 +918,7 @@ public final class LogUtils {
      * USE ME FIRST
      */
     private static StringBuilder appendCommon(StringBuilder appendTo, char phase, long time, long threadId) {
-        writeObject(appendTo, TIMESTAMP, FORMAT.format((double) time / 1000)).append(','); // $NON-NLS-1$
+        writeObject(appendTo, TIMESTAMP, String.format(FORMAT, time / 1000, time % 1000)).append(','); // $NON-NLS-1$
         writeObject(appendTo, PHASE, phase).append(',');
         writeObject(appendTo, TID, threadId).append(',');
         return writeObject(appendTo, PID, threadId); // $NON-NLS-1$
