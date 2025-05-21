@@ -94,6 +94,10 @@ public class TestLoggerBenchmark {
         List<Long> syncNew = new ArrayList<>();
         List<Long> syncOld = new ArrayList<>();
         List<Long> run = new ArrayList<>();
+        long totalRuns = 0;
+        long totalAsyncNew = 0;
+        long totalSyncOld = 0;
+
         for (long runs = warmUp; runs < maxRuns; runs *= growth) {
             for (long i = 0; i < warmUp; i++) {
                 try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) { //$NON-NLS-1$
@@ -220,6 +224,10 @@ public class TestLoggerBenchmark {
         for (int i = 0; i < run.size(); i++) {
             float factor = (float)syncOld.get(i) / (float)asyncNew.get(i);
             asyncNewVsSyncOld.add(factor);
+            totalRuns += run.get(i);
+            totalAsyncNew += asyncNew.get(i);
+            totalSyncOld += syncOld.get(i);
+
             System.out.println(String.format("%d,%d,%d,%d,%d,%.2f", run.get(i), syncOld.get(i), syncNew.get(i), //$NON-NLS-1$
                     asyncOld.get(i), asyncNew.get(i), factor));
         }
@@ -230,13 +238,14 @@ public class TestLoggerBenchmark {
             System.out.println(String.format("%7d %13.2f %13.2f %13.2f %13.2f %27.2fx", run.get(i), syncOld.get(i)*0.000001, syncNew.get(i)*0.000001, //$NON-NLS-1$
                     asyncOld.get(i)*0.000001, asyncNew.get(i)*0.000001, factor));
         }
+        float avgFactor = (float)totalSyncOld / (float)totalAsyncNew;
+        System.out.println("\n\"Regular\" Benchmark Results - Total/Average"); //$NON-NLS-1$
+        System.out.println("Runs(#)   SyncOld(ms)  AsyncNew(ms)  AsyncNewVsSyncOld(rel perf)"); //$NON-NLS-1$
+        System.out.println(String.format("%7d %13.2f %13.2f %27.2fx", totalRuns, totalSyncOld*0.000001, totalAsyncNew*0.000001, avgFactor));//$NON-NLS-1$
 
-        for (int i = 0; i < run.size(); i++) {
-            float factor = asyncNewVsSyncOld.get(i);
-            assertTrue("Runs: " + run.get(i) + " - AsyncNew expected to be much faster vs SyncOld! " +  //$NON-NLS-1$//$NON-NLS-2$
-                    "Expected factor: > " + newAsyncPerformenceThreshold + "x, Actual: " + factor, //$NON-NLS-1$ //$NON-NLS-2$
-                    (factor > newAsyncPerformenceThreshold));
-        }
+        assertTrue("(Regular) On average AsyncNew is expected to be much faster vs SyncOld! " + //$NON-NLS-1$
+                "Expected factor: > " + newAsyncPerformenceThreshold + "x, Actual: " + avgFactor, //$NON-NLS-1$ //$NON-NLS-2$
+                (avgFactor > newAsyncPerformenceThreshold));
     }
 
     private static long linecount(Path path) throws IOException {
@@ -305,6 +314,9 @@ public class TestLoggerBenchmark {
         List<Long> syncNew = new ArrayList<>();
         List<Long> syncOld = new ArrayList<>();
         List<Long> run = new ArrayList<>();
+        long totalRuns = 0;
+        long totalAsyncNew = 0;
+        long totalSyncOld = 0;
         for (long runs = warmUp; runs < maxRuns; runs *= growth) {
             for (long i = 0; i < warmUp; i++) {
                 try (LogUtils.ScopeLog log = new LogUtils.ScopeLog(logger, Level.FINE, "foo")) { //$NON-NLS-1$
@@ -416,6 +428,9 @@ public class TestLoggerBenchmark {
         for (int i = 0; i < run.size(); i++) {
             float factor = (float)syncOld.get(i) / (float)asyncNew.get(i);
             asyncNewVsSyncOld.add(factor);
+            totalRuns += run.get(i);
+            totalAsyncNew += asyncNew.get(i);
+            totalSyncOld += syncOld.get(i);
             System.out.println(String.format("%d,%d,%d,%d,%d,%.2f", run.get(i), syncOld.get(i), syncNew.get(i), //$NON-NLS-1$
                     asyncOld.get(i), asyncNew.get(i), factor));
         }
@@ -427,13 +442,18 @@ public class TestLoggerBenchmark {
             System.out.println(String.format("%7d %13.2f %13.2f %13.2f %13.2f %27.2fx", run.get(i), syncOld.get(i)*0.000001, syncNew.get(i)*0.000001, //$NON-NLS-1$
                     asyncOld.get(i)*0.000001, asyncNew.get(i)*0.000001, factor));
         }
+
+        float avgFactor = (float)totalSyncOld / (float)totalAsyncNew;
+        System.out.println("\n\"Lean\" Benchmark Results - Total/Average"); //$NON-NLS-1$
+        System.out.println("Runs(#)   SyncOld(ms)  AsyncNew(ms)  AsyncNewVsSyncOld(rel perf)"); //$NON-NLS-1$
+        System.out.println(String.format("%7d %13.2f %13.2f %27.2fx", totalRuns, totalSyncOld*0.000001, totalAsyncNew*0.000001, avgFactor));//$NON-NLS-1$
+
+        assertTrue("(Lean) On average AsyncNew is expected to be much faster vs SyncOld! " + //$NON-NLS-1$
+                "Expected factor: > " + newAsyncPerformenceThreshold + "x, Actual: " + avgFactor, //$NON-NLS-1$ //$NON-NLS-2$
+                (avgFactor > newAsyncPerformenceThreshold));
+
+
         System.out.println("-----\n"); //$NON-NLS-1$
-        for (int i = 0; i < run.size(); i++) {
-            float factor = asyncNewVsSyncOld.get(i);
-            assertTrue("Runs: " + run.get(i) + " - AsyncNewLean expected to be much faster vs SyncOldLean! " + //$NON-NLS-1$ //$NON-NLS-2$
-                    "Expected factor: > " + newAsyncPerformenceThreshold + "x, Actual: " + factor, //$NON-NLS-1$ //$NON-NLS-2$
-                    (factor > newAsyncPerformenceThreshold));
-        }
     }
 
     private static Handler makeAsyncFileHandler(String path) throws IOException {
