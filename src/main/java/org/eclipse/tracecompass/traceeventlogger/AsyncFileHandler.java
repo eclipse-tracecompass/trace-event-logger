@@ -87,7 +87,7 @@ import org.eclipse.tracecompass.traceeventlogger.LogUtils.TraceEventLogRecord;
  */
 public class AsyncFileHandler extends StreamHandler {
     private static final LogRecord CLOSE_EVENT = new LogRecord(Level.FINEST, "CLOSE_EVENT"); //$NON-NLS-1$
-    private FileHandler fFileHandler;
+    private final FileHandler fFileHandler;
     private BlockingQueue<List<LogRecord>> fQueue;
     private Thread fWriterThread;
     private int fMaxSize = 1024;
@@ -105,9 +105,7 @@ public class AsyncFileHandler extends StreamHandler {
     TimerTask fTask = new TimerTask() {
         @Override
         public void run() {
-            if (!fRecordBuffer.isEmpty()) {
-                flush();
-            }
+            flush();
         }
     };
 
@@ -290,8 +288,10 @@ public class AsyncFileHandler extends StreamHandler {
     @Override
     public synchronized void flush() {
         try {
-            fQueue.put(fRecordBuffer);
-            fRecordBuffer = new ArrayList<>(fMaxSize);
+             if (!fRecordBuffer.isEmpty()) {
+                fQueue.put(fRecordBuffer);
+                fRecordBuffer = new ArrayList<>(fMaxSize);
+             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
