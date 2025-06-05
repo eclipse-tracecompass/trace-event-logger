@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
@@ -143,8 +142,8 @@ public class SnapshotHandler extends FileHandler {
     @Override
     public boolean isLoggable(LogRecord logRecord) {
         // feature switch here
-        return (fIsEnabled && logRecord != null && super.isLoggable(logRecord)
-                && (logRecord.getLevel().intValue() <= Level.FINE.intValue()) && (logRecord instanceof TraceEventLogRecord)); // add
+        return (fIsEnabled && super.isLoggable(logRecord)
+                && (logRecord instanceof TraceEventLogRecord)); // add
     }
 
     private boolean addToSnapshot(LogRecord message) {
@@ -168,14 +167,26 @@ public class SnapshotHandler extends FileHandler {
         case "E": //$NON-NLS-1$
         {
             InnerEvent lastEvent = stack.remove(stack.size() - 1);
+            // top-level trace "segment" for this thread?
             if (stack.isEmpty()) {
+                // some housekeeping before flushing
+                pidMap.remove(event.getTid());
+                if (pidMap.isEmpty()) {
+                    // was the last entry for this pid/tid
+                    fStacks.remove(event.getPid());
+                }
+
                 // convert to seconds
                 double delta = (event.getTs() - lastEvent.getTs()) * 0.000001;
                 if (delta > fTimeout) {
+                    Deque<InnerEvent> toDrain = fData;
+                    // Start a new in-memory event queue, so we can continue to
+                    // process new events while draining the old queue to disk
+                    fData = new ArrayDeque<>();
                     if(fAsynchronousDrain) {
-                        drain(fData);
+                        drain(toDrain);
                     } else {
-                        drainTrace(fData).run();
+                        drainTrace(toDrain).run();
                     }
                 }
             }
@@ -189,10 +200,9 @@ public class SnapshotHandler extends FileHandler {
 
     @Override
     public synchronized void publish(LogRecord record) {
-        if (record != null) {
+        if (isLoggable(record)) {
             addToSnapshot(record);
         }
-        super.publish(record);
     }
 
     private void drain(Deque<InnerEvent> data) {
